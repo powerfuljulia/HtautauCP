@@ -1,4 +1,4 @@
-# $$H\rightarrow\tau\tau$$ CP analysis with NN
+#$H\rightarrow\tau\tau$ CP analysis with NN
 ---
 
 Basic workflow should be:
