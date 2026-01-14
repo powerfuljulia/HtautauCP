@@ -25,6 +25,10 @@ Before you start doing anything else, you need to make sure the following are in
 ```bash
 curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 bash Miniforge3-$(uname)-$(uname -m).sh -b
+```
+
+Starting from a new shell:
+```bash
 conda env create -f htautaucp_project/environment.yml
 conda activate CP_NN
 ```
