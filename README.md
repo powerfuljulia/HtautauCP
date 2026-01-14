@@ -72,7 +72,7 @@ make
 
 This should give you 2 plots, one of the truth level Higgs Mass, the other of the truth level di-tau visible mass. The distinction comes from the fact that it is not possible to detect the neutrinos at the LHC with a detector like ATLAS, so tau leptons are only partially reconstructed - only the 'visible' part gets reconstructed - in this case the charged pions resulting from the decay.
 
-##Train the NN
+## Train the NN  
 
 To train the neural network we will use 'scikit-learn', so it should be installed in your conda environment:
 
