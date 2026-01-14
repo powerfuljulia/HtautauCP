@@ -83,5 +83,6 @@ conda install scikit-learn
 The directory `TrainNN` contains code to train a Multi-layer Perceptron classifier using the module [MLPClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html) from sklearn. This code was used to train a NN used to probe for CP violation in the Higgs gauge boson couplings in vector boson fusion (VBF) production of the Higgs. It was used to derive the results in section 8 of this [paper](https://arxiv.org/abs/2511.08359). The methodology is used is described in this earlier [paper](https://arxiv.org/abs/2112.05052). The exact inputs which were used are also available in this repo. You can run the training using
 
 ```bash
+cd TrainNN
 python ANN.py --EFTFile SMEFT_chwtil_VBF_H_TauTau.csv --SMFile SM_VBF_H_TauTau.csv --bkgdFile Zjets_VBF_rescaled.csv --energy 13
 ```
