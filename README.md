@@ -58,4 +58,16 @@ make
 ./Htautau
 ```
 
-You should have as output a `Htautau.root` file, which is a ntuple, or ROOT tree, which is a very commonly used format for particle physics events which is widely used by physicists at CERN. 
+You should have as output a `Htautau.root` file, which is a ntuple, or ROOT tree, which is a very commonly used format for particle physics events which is widely used by physicists at CERN.
+
+## Analysis
+
+A preliminary setup to do some analysis with the events saved in the root file can be found in the `AngularAnalysis` directory. This is C++ code and uses ROOT to open the file, loop over the events, build some `TLorentzVectors` of the truth particles, fill some histograms and make some plots. You can find some tutorials to help you get started with ROOT [here](https://root.cern/doc/v638/group__Tutorials.html). We can modify this code to do some of the angular validation we are interested in (this still needs to be added). To run the example as is, you can do:
+
+```bash
+cd AngularAnalysis
+make
+./Analyser
+```
+
+This should give you 2 plots, one of the truth level Higgs Mass, the other of the truth level di-tau visible mass. The distinction comes from the fact that it is not possible to detect the neutrinos at the LHC with a detector like ATLAS, so tau leptons are only partially reconstructed - only the 'visible' part gets reconstructed - in this case the charged pions resulting from the decay.

@@ -14,6 +14,7 @@
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
 #include "TVector3.h"
+#include "TTree.h"
 
 
 #include <iostream>
@@ -47,10 +48,35 @@ TH1D* h_NegPi_Pt;
 TH1D* h_DiTau_VisMass;
 TH1D* h_DiTau_VisPt;
 
-TH1D* h_Signed_Acoplanarity;
+
+double m_T_Truth_Higgs_Pt;
+double m_T_Truth_Higgs_Eta;
+double m_T_Truth_Higgs_Phi;
+double m_T_Truth_Higgs_M;
+
+double m_T_Truth_TauMinus_Pt;
+double m_T_Truth_TauMinus_Eta;
+double m_T_Truth_TauMinus_Phi;
+
+double m_T_Truth_TauPlus_Pt;
+double m_T_Truth_TauPlus_Eta;
+double m_T_Truth_TauPlus_Phi;
+
+double m_T_Truth_PiMinus_Pt;
+double m_T_Truth_PiMinus_Eta;
+double m_T_Truth_PiMinus_Phi;
+
+double m_T_Truth_PiPlus_Pt;
+double m_T_Truth_PiPlus_Eta;
+double m_T_Truth_PiPlus_Phi;
+
 
 void GetDecayProducts(const unsigned int p, std::vector<unsigned int> & products);
 
 bool CheckUnique(unsigned int p, std::vector<unsigned int> products);
+
+void BranchMaker(TTree* Tree);
+
+void ClearVars();
 
 int main(int argc, char* argv[]);
