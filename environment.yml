@@ -1,4 +1,4 @@
-name: NN-CPV2
+name: CP_NN
 channels:
   - conda-forge
 dependencies:
