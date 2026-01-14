@@ -23,12 +23,39 @@ git clone https://gitlab.cern.ch/jusilva/htautaucp_project.git
 Before you start doing anything else, you need to make sure the following are installed on your machine: python 3.7 (or later), gcc/gfortran 4.6 (or later), and the CERN ROOT libraries. For running the analysis steps later, you will also need scikit-hep installed. If these packages are not installed on your machine, an easy way to proceed is to install conda/mamba (https://github.com/conda-forge/miniforge#mambaforge) and create a conda environment using the environment.yml file provided in this package, i.e.
 
 ```bash
-curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
-bash Mambaforge-$(uname)-$(uname -m).sh
-conda env create -f environment.yml
-conda init
-conda activate NN-CPV2
+curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+bash Miniforge3-$(uname)-$(uname -m).sh -b
+conda env create -f htautaucp_project/environment.yml
+conda activate CP_NN
 ```
 
+Then, you can go into the directory and install/build Pythia:
 
+```bash
+cd htautaucp_project
+source installPythia.sh
+```
 
+Pythia allows you to generate particle physics processes at truth level, but it does not generate the detector response. Down the line we could want to generate also the response of the ATLAS detector, and for that you could install/build Delphes (but not really needed to start with).
+
+```bash
+cd htautaucp_project
+source installDelphes.sh
+```
+
+## Pythia Generation
+
+You can now generate some particle interactions! For that we use Pythia, whose [manual](https://pythia.org/latest-manual/Welcome.html) you can take a look at to learn a bit more about what is going on. In this case we are interested in an LHC enviroment, so pp collisions at around 13 TeV centre of mass energy; and on Higgs production, and Higgs decays to tau leptons.
+Most of the relevant settings for the process we are interested in simulating are defined [here](https://pythia.org/latest-manual/HiggsProcesses.html).
+Higgs bosons get produced through different processes, most often through the fusion of two gluons (gluon-gluon fusion or ggF). Figure 11.1 of the [PDG review on the Higgs boson](https://pdg.lbl.gov/2023/reviews/rpp2023-rev-higgs-boson.pdf) shows different Higgs production mechanisms. Higgs bosons also decay in many different ways, namely pairs of fermions-antifermions (Yukawa coupling), like is the case for $H\rightarrow\tau^{+}\tau^{-}$. Table 11.3 of the same PDG review lists the rates of different Higgs decay processes.
+We are interested in probing the CP properties of the Higgs interactions to tau leptons. For that it is useful to generate the $H\rightarrow\tau^{+}\tau^{-}$ process under different CP hypothesis. Different CP admixtures in the Higgs-tau couplings can be set using the 'HiggsH1:parity' and 'HiggsH1:phiParity' parameters also described [here](https://pythia.org/latest-manual/HiggsProcesses.html).
+
+In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}\tau^{-}$, under the CP-even hypothesis. The tau leptons are also forced to decay by $\tau\rightarrow\pi\nu$. You can generate some events by doing:
+
+```bash
+cd PythiaGeneration
+make
+./Htautau
+```
+
+You should have as output a `Htautau.root` file, which is a ntuple, or ROOT tree, which is a very commonly used format for particle physics events which is widely used by physicists at CERN. 
