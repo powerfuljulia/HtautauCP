@@ -90,3 +90,27 @@ The directory `TrainNN` contains code to train a Multi-layer Perceptron classifi
 cd TrainNN
 python ANN.py --EFTFile SMEFT_chwtil_VBF_H_TauTau.csv --SMFile SM_VBF_H_TauTau.csv --bkgdFile Zjets_VBF_rescaled.csv --energy 13
 ```
+
+----
+
+## Using gitlab
+
+Some notes on working with gitlab:
+
+```bash
+#Fork repo on GitLab/GitHub  
+  
+git clone https://gitlab.com/<you>/<repo>.git
+cd repo
+
+git checkout -b my-feature-branch
+
+# (optional) sync with original repo
+git remote add upstream https://gitlab.com/<original>/<repo>.git
+git pull upstream main
+
+# work on code
+git add .
+git commit -m "message"
+git push -u origin my-feature-branch
+```
