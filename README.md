@@ -20,11 +20,11 @@ You can clone this repository using git via https or ssh, i.e.
 git clone https://gitlab.cern.ch/jusilva/htautaucp_project.git
 ```
 
-Before you start doing anything else, you need to make sure the following are installed on your machine: python 3.7 (or later), gcc/gfortran 4.6 (or later), and the CERN ROOT libraries. For running the analysis steps later, you will also need scikit-hep installed. If these packages are not installed on your machine, an easy way to proceed is to install conda/mamba (https://github.com/conda-forge/miniforge#mambaforge) and create a conda environment using the environment.yml file provided in this package, i.e.
+Before you start doing anything else, you need to make sure the following are installed on your machine: python 3.7 (or later), gcc/gfortran 4.6 (or later), and the CERN ROOT libraries. For running the analysis steps later, you will also need scikit-hep installed. If these packages are not installed on your machine, an easy way to proceed is to install conda/mamba (https://github.com/conda-forge/miniforge#mambaforge) and create a conda environment using the environment.yml file provided in this package. Run the following commands, one by one (the second one will run interactively, and prompt you to accept terms and conditions/place of installation
 
 ```bash
 curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-bash Miniforge3-$(uname)-$(uname -m).sh -b
+bash Miniforge3-$(uname)-$(uname -m).sh 
 ```
 
 Starting from a new shell:
@@ -39,7 +39,7 @@ Then, you can go into the directory and install/build Pythia:
 cd htautaucp_project
 source installPythia.sh
 ```
-
+This script uses `wget` to get the pythia installation folder. If you do not have `wget` installed, or do not want to install it (it could be as simple as running `brew install wget`), you can go [here](https://pythia.org/releases/) and download the `.tgz` for `pythia8309` into `htautaucp_project`. 
 Pythia allows you to generate particle physics processes at truth level, but it does not generate the detector response. Down the line we could want to generate also the response of the ATLAS detector, and for that you could install/build Delphes (but not really needed to start with).
 
 ```bash
