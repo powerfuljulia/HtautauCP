@@ -67,7 +67,7 @@ If you want to take a look at what is the file, you can do `root Htautau.root` a
 
 ## Analysis
 
-A preliminary setup to do some analysis with the events saved in the root file can be found in the `AngularAnalysis` directory. This is C++ code and uses ROOT to open the file, loop over the events, build some `TLorentzVectors` of the truth particles, fill some histograms and make some plots. You can find some tutorials to help you get started with ROOT [here](https://root.cern/doc/v638/group__Tutorials.html). We can modify this code to do some of the angular validation we are interested in (this still needs to be added). To run the example as is, you can do:
+A preliminary setup to do some analysis with the events saved in the root file can be found in the `AngularAnalysis` directory. This is C++ code and uses ROOT to open the file, loop over the events, build some `TLorentzVectors` of the truth particles (class described [here](https://root.cern.ch/doc/master/classTLorentzVector.html)), fill some histograms and make some plots. You can find some tutorials to help you get started with ROOT [here](https://root.cern/doc/v638/group__Tutorials.html). We can modify this code to do some of the angular validation we are interested in (this still needs to be added). To run the example as is, you can do:
 
 ```bash
 cd AngularAnalysis
