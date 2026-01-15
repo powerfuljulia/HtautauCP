@@ -63,6 +63,7 @@ make
 ```
 
 You should have as output a `Htautau.root` file, which is a ntuple, or ROOT tree, which is a very commonly used format for particle physics events which is widely used by physicists at CERN.
+If you want to take a look at what is the file, you can do `root Htautau.root` and it will open a root interactive session. You can then use `TBrowser b` to check the file. To leave the root interactive session just type `.q`.
 
 ## Analysis
 
