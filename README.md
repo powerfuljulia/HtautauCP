@@ -1,11 +1,11 @@
-# $H\rightarrow\tau\tau$ CP analysis with NN
+# $H\rightarrow\tau\tau$ CP analysis with NNA
 ---
 
 Basic workflow should be:
 - Generate $H\rightarrow\tau\tau$ process of interest in with different CP configurations using Pythia:
-  - CP-even ($\phi = 0$)  
-  - CP-odd ($\phi = 90$)  
-  - Mixed ($\phi = -45$ , $\phi = 45$)
+  - CP-even ($\phi = 0 \degree$)  
+  - CP-odd ($\phi = 90 \degree$)  
+  - Mixed ($\phi = -45 \degree$ , $\phi = 45 \degree$)
 - Validate samples by plotting signed acoplanarity for each configuration
 - Train NN on final state decay products using mixed state samples
   - Test different input variables
@@ -59,23 +59,26 @@ In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}
 ```bash
 cd PythiaGeneration
 make
-./Htautau
+./Htautau --CPState <0/1/2> --phi <phi>
 ```
 
+**CPstate**: 0 - CP-even, 1 - CP-odd, 2 - CP mix (use with a phi angle!)  
 You should have as output a `Htautau.root` file, which is a ntuple, or ROOT tree, which is a very commonly used format for particle physics events which is widely used by physicists at CERN.
-If you want to take a look at what is the file, you can do `root Htautau.root` and it will open a root interactive session. You can then use `TBrowser b` to check the file. To leave the root interactive session just type `.q`.
+If you want to take a look at what is the file, you can do `root Htautau.root` and it will open a root interactive session. You can then use `TBrowser b` to check the file. To leave the root interactive session just type `.q`. If you do `source runGeneration.sh` you will get a CP-even, a CP-odd and two maximally mixed ($\phi = \pm 45\degree$) samples.
 
 ## Analysis
 
-A preliminary setup to do some analysis with the events saved in the root file can be found in the `AngularAnalysis` directory. This is C++ code and uses ROOT to open the file, loop over the events, build some `TLorentzVectors` of the truth particles (class described [here](https://root.cern.ch/doc/master/classTLorentzVector.html)), fill some histograms and make some plots. You can find some tutorials to help you get started with ROOT [here](https://root.cern/doc/v638/group__Tutorials.html). We can modify this code to do some of the angular validation we are interested in (this still needs to be added). To run the example as is, you can do:
+A preliminary setup to do some analysis with the events saved in the root file can be found in the `AngularAnalysis` directory. This is C++ code and uses ROOT to open the file, loop over the events, build some `TLorentzVectors` of the truth particles (class described [here](https://root.cern.ch/doc/master/classTLorentzVector.html)), fill some histograms and make some plots. You can find some tutorials to help you get started with ROOT [here](https://root.cern/doc/v638/group__Tutorials.html). I have also added the calculation of the truth level signed acoplanarity. To run the example as is, you can do:
 
 ```bash
 cd AngularAnalysis
 make
-./Analyser
+./Analyser --CPState <0/1/2>  --phi <phi angle> --inFile <infile>
 ```
 
-This should give you 2 plots, one of the truth level Higgs Mass, the other of the truth level di-tau visible mass. The distinction comes from the fact that it is not possible to detect the neutrinos at the LHC with a detector like ATLAS, so tau leptons are only partially reconstructed - only the 'visible' part gets reconstructed - in this case the charged pions resulting from the decay.
+**CPstate**: 0 - CP-even, 1 - CP-odd, 2 - CP mix (use with a phi angle!)
+*inFile*: input root file - the samples you just generated  
+This should give you 3 plots: one of the truth level Higgs Mass, the other of the truth level di-tau visible mass, and the signed acoplanarity. The distinction between the two masses comes from the fact that it is not possible to detect the neutrinos at the LHC with a detector like ATLAS, so tau leptons are only partially reconstructed - only the 'visible' part gets reconstructed - in this case the charged pions resulting from the decay. You can compare the signed acoplanarity with the one documented [here](https://arxiv.org/pdf/2212.05833)! Do you see what was expected for each CP hypothesis? If you run `source RunAngularAnalysis.sh` you can get a plot comparing the signed acoplanirity for $H\rightarrow\tau^{+}\tau^{-}\rightarrow\pi\nu\pi\nu$ for different CP hypothesis.  
 
 ## Train the NN  
 
