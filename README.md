@@ -76,8 +76,8 @@ make
 ./Analyser --CPState <0/1/2>  --phi <phi angle> --inFile <infile>
 ```
 
-**CPstate**: 0 - CP-even, 1 - CP-odd, 2 - CP mix (use with a phi angle!)
-*inFile*: input root file - the samples you just generated  
+**CPstate**: 0 - CP-even, 1 - CP-odd, 2 - CP mix (use with a phi angle!)  
+**inFile**: input root file - the samples you just generated  
 This should give you 3 plots: one of the truth level Higgs Mass, the other of the truth level di-tau visible mass, and the signed acoplanarity. The distinction between the two masses comes from the fact that it is not possible to detect the neutrinos at the LHC with a detector like ATLAS, so tau leptons are only partially reconstructed - only the 'visible' part gets reconstructed - in this case the charged pions resulting from the decay. You can compare the signed acoplanarity with the one documented [here](https://arxiv.org/pdf/2212.05833)! Do you see what was expected for each CP hypothesis? If you run `source RunAngularAnalysis.sh` you can get a plot comparing the signed acoplanirity for $H\rightarrow\tau^{+}\tau^{-}\rightarrow\pi\nu\pi\nu$ for different CP hypothesis.  
 
 ## Train the NN  
