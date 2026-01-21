@@ -52,9 +52,9 @@ source installDelphes.sh
 You can now generate some particle interactions! For that we use Pythia, whose [manual](https://pythia.org/latest-manual/Welcome.html) you can take a look at to learn a bit more about what is going on. In this case we are interested in an LHC enviroment, so pp collisions at around 13 TeV centre of mass energy; and on Higgs production, and Higgs decays to tau leptons.
 Most of the relevant settings for the process we are interested in simulating are defined [here](https://pythia.org/latest-manual/HiggsProcesses.html).
 Higgs bosons get produced through different processes, most often through the fusion of two gluons (gluon-gluon fusion or ggF). Figure 11.1 of the [PDG review on the Higgs boson](https://pdg.lbl.gov/2023/reviews/rpp2023-rev-higgs-boson.pdf) shows different Higgs production mechanisms. Higgs bosons also decay in many different ways, namely pairs of fermions-antifermions (Yukawa coupling), like is the case for $H\rightarrow\tau^{+}\tau^{-}$. Table 11.3 of the same PDG review lists the rates of different Higgs decay processes.
-We are interested in probing the CP properties of the Higgs interactions to tau leptons. For that it is useful to generate the $H\rightarrow\tau^{+}\tau^{-}$ process under different CP hypothesis. Different CP admixtures in the Higgs-tau couplings can be set using the 'HiggsH1:parity' and 'HiggsH1:phiParity' parameters also described [here](https://pythia.org/latest-manual/HiggsProcesses.html).
+We are interested in probing the CP properties of the Higgs interactions to tau leptons. For that it is useful to generate the $H\rightarrow\tau^{+}\tau^{-}$ process under different CP hypotheses. Different CP admixtures in the Higgs-tau couplings can be set using the 'HiggsH1:parity' and 'HiggsH1:phiParity' parameters also described [here](https://pythia.org/latest-manual/HiggsProcesses.html).
 
-In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}\tau^{-}$, under the CP-even hypothesis. The tau leptons are also forced to decay by $\tau\rightarrow\pi\nu$. You can generate some events by doing:
+In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}\tau^{-}$, under the CP-even hypotheses. The tau leptons are also forced to decay by $\tau\rightarrow\pi\nu$. You can generate some events by doing:
 
 ```bash
 cd PythiaGeneration
@@ -78,7 +78,7 @@ make
 
 **CPstate**: 0 - CP-even, 1 - CP-odd, 2 - CP mix (use with a phi angle!)  
 **inFile**: input root file - the samples you just generated  
-This should give you 3 plots: one of the truth level Higgs Mass, the other of the truth level di-tau visible mass, and the signed acoplanarity. The distinction between the two masses comes from the fact that it is not possible to detect the neutrinos at the LHC with a detector like ATLAS, so tau leptons are only partially reconstructed - only the 'visible' part gets reconstructed - in this case the charged pions resulting from the decay. You can compare the signed acoplanarity with the one documented [here](https://arxiv.org/pdf/2212.05833)! Do you see what was expected for each CP hypothesis? If you run `source RunAngularAnalysis.sh` you can get a plot comparing the signed acoplanirity for $H\rightarrow\tau^{+}\tau^{-}\rightarrow\pi\nu\pi\nu$ for different CP hypothesis.  
+This should give you 3 plots: one of the truth level Higgs Mass, the other of the truth level di-tau visible mass, and the signed acoplanarity. The distinction between the two masses comes from the fact that it is not possible to detect the neutrinos at the LHC with a detector like ATLAS, so tau leptons are only partially reconstructed - only the 'visible' part gets reconstructed - in this case the charged pions resulting from the decay. You can compare the signed acoplanarity with the one documented [here](https://arxiv.org/pdf/2212.05833)! Do you see what was expected for each CP hypothesis? If you run `source RunAngularAnalysis.sh` you can get a plot comparing the signed acoplanarity for $H\rightarrow\tau^{+}\tau^{-}\rightarrow\pi\nu\pi\nu$ for different CP hypotheses.  
 
 ## Train the NN  
 
