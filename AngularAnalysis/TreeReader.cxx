@@ -97,14 +97,27 @@ void TreeReader::Init(TTree *tree)
    fChain->SetBranchAddress("Truth_TauMinus_Pt", &Truth_TauMinus_Pt, &b_Truth_TauMinus_Pt);
    fChain->SetBranchAddress("Truth_TauMinus_Eta", &Truth_TauMinus_Eta, &b_Truth_TauMinus_Eta);
    fChain->SetBranchAddress("Truth_TauMinus_Phi", &Truth_TauMinus_Phi, &b_Truth_TauMinus_Phi);
+   fChain->SetBranchAddress("Truth_TauMinus_ProdVtx_X", &Truth_TauMinus_ProdVtx_X, &b_Truth_TauMinus_ProdVtx_X);
+   fChain->SetBranchAddress("Truth_TauMinus_ProdVtx_Y", &Truth_TauMinus_ProdVtx_Y, &b_Truth_TauMinus_ProdVtx_Y);
+   fChain->SetBranchAddress("Truth_TauMinus_ProdVtx_Z", &Truth_TauMinus_ProdVtx_Z, &b_Truth_TauMinus_ProdVtx_Z);
    fChain->SetBranchAddress("Truth_TauPlus_Pt", &Truth_TauPlus_Pt, &b_Truth_TauPlus_Pt);
    fChain->SetBranchAddress("Truth_TauPlus_Eta", &Truth_TauPlus_Eta, &b_Truth_TauPlus_Eta);
    fChain->SetBranchAddress("Truth_TauPlus_Phi", &Truth_TauPlus_Phi, &b_Truth_TauPlus_Phi);
+   fChain->SetBranchAddress("Truth_TauPlus_ProdVtx_X", &Truth_TauPlus_ProdVtx_X, &b_Truth_TauPlus_ProdVtx_X);
+   fChain->SetBranchAddress("Truth_TauPlus_ProdVtx_Y", &Truth_TauPlus_ProdVtx_Y, &b_Truth_TauPlus_ProdVtx_Y);
+   fChain->SetBranchAddress("Truth_TauPlus_ProdVtx_Z", &Truth_TauPlus_ProdVtx_Z, &b_Truth_TauPlus_ProdVtx_Z); 
    fChain->SetBranchAddress("Truth_PiMinus_Pt", &Truth_PiMinus_Pt, &b_Truth_PiMinus_Pt);
    fChain->SetBranchAddress("Truth_PiMinus_Eta", &Truth_PiMinus_Eta, &b_Truth_PiMinus_Eta);
    fChain->SetBranchAddress("Truth_PiMinus_Phi", &Truth_PiMinus_Phi, &b_Truth_PiMinus_Phi);
+   fChain->SetBranchAddress("Truth_PiMinus_ProdVtx_X", &Truth_PiMinus_ProdVtx_X, &b_Truth_PiMinus_ProdVtx_X);
+   fChain->SetBranchAddress("Truth_PiMinus_ProdVtx_Y", &Truth_PiMinus_ProdVtx_Y, &b_Truth_PiMinus_ProdVtx_Y);
+   fChain->SetBranchAddress("Truth_PiMinus_ProdVtx_Z", &Truth_PiMinus_ProdVtx_Z, &b_Truth_PiMinus_ProdVtx_Z);
    fChain->SetBranchAddress("Truth_PiPlus_Pt", &Truth_PiPlus_Pt, &b_Truth_PiPlus_Pt);
-   fChain->SetBranchAddress("Truth_PiPlus_Eta", &Truth_PiPlus_Eta, &b_Truth_PiPlus_Eta);  
+   fChain->SetBranchAddress("Truth_PiPlus_Eta", &Truth_PiPlus_Eta, &b_Truth_PiPlus_Eta);
+   fChain->SetBranchAddress("Truth_PiPlus_Phi", &Truth_PiPlus_Phi, &b_Truth_PiPlus_Phi);
+   fChain->SetBranchAddress("Truth_PiPlus_ProdVtx_X", &Truth_PiPlus_ProdVtx_X, &b_Truth_PiPlus_ProdVtx_X);
+   fChain->SetBranchAddress("Truth_PiPlus_ProdVtx_Y", &Truth_PiPlus_ProdVtx_Y, &b_Truth_PiPlus_ProdVtx_Y);
+   fChain->SetBranchAddress("Truth_PiPlus_ProdVtx_Z", &Truth_PiPlus_ProdVtx_Z, &b_Truth_PiPlus_ProdVtx_Z);  
 
    Notify();
 }

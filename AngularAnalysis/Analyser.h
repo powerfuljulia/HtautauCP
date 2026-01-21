@@ -25,5 +25,6 @@
 #include "AtlasStyle.h"
 TH1D* h_Higgs_Mass;
 TH1D* h_DiTau_VisMass;
+TH1D* h_SignedAcoplanarity_IP;
 
 #endif//ANALYSER_H

@@ -26,15 +26,27 @@ public :
    Double_t Truth_TauMinus_Pt;
    Double_t Truth_TauMinus_Eta;
    Double_t Truth_TauMinus_Phi;
+   Double_t Truth_TauMinus_ProdVtx_X;
+   Double_t Truth_TauMinus_ProdVtx_Y;
+   Double_t Truth_TauMinus_ProdVtx_Z;
    Double_t Truth_TauPlus_Pt;
    Double_t Truth_TauPlus_Eta;
    Double_t Truth_TauPlus_Phi;
+   Double_t Truth_TauPlus_ProdVtx_X;
+   Double_t Truth_TauPlus_ProdVtx_Y;
+   Double_t Truth_TauPlus_ProdVtx_Z;
    Double_t Truth_PiMinus_Pt;
    Double_t Truth_PiMinus_Eta;
    Double_t Truth_PiMinus_Phi;
+   Double_t Truth_PiMinus_ProdVtx_X;
+   Double_t Truth_PiMinus_ProdVtx_Y;
+   Double_t Truth_PiMinus_ProdVtx_Z;
    Double_t Truth_PiPlus_Pt;
    Double_t Truth_PiPlus_Eta;
    Double_t Truth_PiPlus_Phi;
+   Double_t Truth_PiPlus_ProdVtx_X;
+   Double_t Truth_PiPlus_ProdVtx_Y;
+   Double_t Truth_PiPlus_ProdVtx_Z;
 
    // List of branches
    TBranch        *b_Truth_Higgs_Pt;   //!
@@ -44,15 +56,27 @@ public :
    TBranch        *b_Truth_TauMinus_Pt;   //!
    TBranch        *b_Truth_TauMinus_Eta;   //!
    TBranch        *b_Truth_TauMinus_Phi;   //!
+   TBranch        *b_Truth_TauMinus_ProdVtx_X;   //!
+   TBranch        *b_Truth_TauMinus_ProdVtx_Y;   //!
+   TBranch        *b_Truth_TauMinus_ProdVtx_Z;   //!
    TBranch        *b_Truth_TauPlus_Pt;   //!
    TBranch        *b_Truth_TauPlus_Eta;   //! 
    TBranch        *b_Truth_TauPlus_Phi;   //!
+   TBranch        *b_Truth_TauPlus_ProdVtx_X;   //!
+   TBranch        *b_Truth_TauPlus_ProdVtx_Y;   //!
+   TBranch        *b_Truth_TauPlus_ProdVtx_Z;   //!
    TBranch        *b_Truth_PiMinus_Pt;   //!
    TBranch        *b_Truth_PiMinus_Eta;   //!
    TBranch        *b_Truth_PiMinus_Phi;   //!
+   TBranch        *b_Truth_PiMinus_ProdVtx_X;   //!
+   TBranch        *b_Truth_PiMinus_ProdVtx_Y;   //!
+   TBranch        *b_Truth_PiMinus_ProdVtx_Z;   //!
    TBranch        *b_Truth_PiPlus_Pt;   //!
    TBranch        *b_Truth_PiPlus_Eta;   //!
    TBranch        *b_Truth_PiPlus_Phi;   //!
+   TBranch        *b_Truth_PiPlus_ProdVtx_X;   //!
+   TBranch        *b_Truth_PiPlus_ProdVtx_Y;   //!
+   TBranch        *b_Truth_PiPlus_ProdVtx_Z;   //
 
    TreeReader(TTree *tree=0);
    virtual ~TreeReader();
