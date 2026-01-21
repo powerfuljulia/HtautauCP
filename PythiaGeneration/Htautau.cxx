@@ -1,10 +1,30 @@
 #include "Htautau.h"
 
 // const unsigned int nEvents = 5000000;
-const unsigned int nEvents = 10000;
+const unsigned int nEvents = 1000000;
 
 int main(int argc, char* argv[]) {
 
+  int CPstate = 0;
+  std::string phi = "0.785398";
+  for(int i=1 ; i<argc ; ++i){
+    std::string argument = argv[i];
+    std::stringstream convert;
+
+    if(argument == "--CPState"){
+      convert << argv[++i];
+      convert >> CPstate;
+     
+    }
+
+    if(argument == "--phi"){
+      convert << argv[++i];
+      convert >> phi;
+    }
+    
+  }
+
+  TString outputName = "Htautau.root";
     std::cout << "Start H->tautau decay test" << std::endl;
 
     // Set seed
@@ -23,6 +43,17 @@ int main(int argc, char* argv[]) {
     pythia.readString("PartonLevel:MPI = off");
 
     // H->tau tau decays
+    if(CPstate == 1) {
+      outputName = "Htautau_CPodd.root";
+      pythia.readString("HiggsH1:parity = 2"); // making things CP-odd
+    }
+
+    else if(CPstate == 2){
+      outputName = "Htautau_CPmix_"+phi+".root";
+      pythia.readString("HiggsH1:parity = 4");
+      pythia.readString("HiggsH1:phiParity = " + phi);
+    }
+    
     pythia.readString("25:onMode = off");
     pythia.readString("25:onIfMatch = 15 15");
 
@@ -37,7 +68,7 @@ int main(int argc, char* argv[]) {
     pythia.init();
 
     // Setup output
-    OutputFile = new TFile("Htautau.root", "recreate");
+    OutputFile = new TFile(outputName, "recreate");
     OutputFile->cd();
 
     // Initialise histograms
@@ -163,17 +194,33 @@ int main(int argc, char* argv[]) {
         m_T_Truth_TauMinus_Eta = TauMinus.Eta();
         m_T_Truth_TauMinus_Phi = TauMinus.Phi();
 
+        m_T_Truth_TauMinus_ProdVtx_X = pythia.event[iTauMin].xProd();
+        m_T_Truth_TauMinus_ProdVtx_Y = pythia.event[iTauMin].yProd();
+        m_T_Truth_TauMinus_ProdVtx_Z = pythia.event[iTauMin].zProd();
+
         m_T_Truth_TauPlus_Pt = TauPlus.Pt();
         m_T_Truth_TauPlus_Eta = TauPlus.Eta();
         m_T_Truth_TauPlus_Phi = TauPlus.Phi();
+
+        m_T_Truth_TauPlus_ProdVtx_X = pythia.event[iTauPos].xProd();
+        m_T_Truth_TauPlus_ProdVtx_Y = pythia.event[iTauPos].yProd();
+        m_T_Truth_TauPlus_ProdVtx_Z = pythia.event[iTauPos].zProd();
 
         m_T_Truth_PiMinus_Pt = PiMin.Pt();
         m_T_Truth_PiMinus_Eta = PiMin.Eta();
         m_T_Truth_PiMinus_Phi = PiMin.Phi();
 
+        m_T_Truth_PiMinus_ProdVtx_X = pythia.event[iPiMin].xProd();
+        m_T_Truth_PiMinus_ProdVtx_Y = pythia.event[iPiMin].yProd();
+        m_T_Truth_PiMinus_ProdVtx_Z = pythia.event[iPiMin].zProd();
+
         m_T_Truth_PiPlus_Pt = PiPos.Pt();
         m_T_Truth_PiPlus_Eta = PiPos.Eta();
         m_T_Truth_PiPlus_Phi = PiPos.Phi();
+
+        m_T_Truth_PiPlus_ProdVtx_X = pythia.event[iPiPos].xProd();
+        m_T_Truth_PiPlus_ProdVtx_Y = pythia.event[iPiPos].yProd();
+        m_T_Truth_PiPlus_ProdVtx_Z = pythia.event[iPiPos].zProd();
 
         outputTree->Fill();
     }
@@ -241,18 +288,32 @@ void ClearVars() {
     m_T_Truth_TauMinus_Pt = -99.;
     m_T_Truth_TauMinus_Eta  = -99.;
     m_T_Truth_TauMinus_Phi = -99.;
+    m_T_Truth_TauMinus_ProdVtx_X = -99.;
+    m_T_Truth_TauMinus_ProdVtx_Y = -99.;
+    m_T_Truth_TauMinus_ProdVtx_Z = -99.;
     
     m_T_Truth_TauPlus_Pt = -99.;
     m_T_Truth_TauPlus_Eta = -99.;
     m_T_Truth_TauPlus_Phi = -99.;
+    m_T_Truth_TauPlus_ProdVtx_X = -99.;
+    m_T_Truth_TauPlus_ProdVtx_Y = -99.;
+    m_T_Truth_TauPlus_ProdVtx_Z = -99.;
     
     m_T_Truth_PiMinus_Pt = -99.;
     m_T_Truth_PiMinus_Eta = -99.;
     m_T_Truth_PiMinus_Phi = -99.;
+
+    m_T_Truth_PiMinus_ProdVtx_X = -99.;
+    m_T_Truth_PiMinus_ProdVtx_Y = -99.;
+    m_T_Truth_PiMinus_ProdVtx_Z = -99.;
     
     m_T_Truth_PiPlus_Pt = -99.;
     m_T_Truth_PiPlus_Eta = -99.;
     m_T_Truth_PiPlus_Phi = -99.;
+
+    m_T_Truth_PiPlus_ProdVtx_X = -99.;
+    m_T_Truth_PiPlus_ProdVtx_Y = -99.;
+    m_T_Truth_PiPlus_ProdVtx_Z = -99.;
 
 }
 
@@ -264,13 +325,25 @@ void BranchMaker(TTree* Tree) {
     Tree->Branch("Truth_TauMinus_Pt", &m_T_Truth_TauMinus_Pt);
     Tree->Branch("Truth_TauMinus_Eta", &m_T_Truth_TauMinus_Eta);
     Tree->Branch("Truth_TauMinus_Phi", &m_T_Truth_TauMinus_Phi);
+    Tree->Branch("Truth_TauMinus_ProdVtx_X", &m_T_Truth_TauMinus_ProdVtx_X);
+    Tree->Branch("Truth_TauMinus_ProdVtx_Y", &m_T_Truth_TauMinus_ProdVtx_Y);
+    Tree->Branch("Truth_TauMinus_ProdVtx_Z", &m_T_Truth_TauMinus_ProdVtx_Z);
     Tree->Branch("Truth_TauPlus_Pt", &m_T_Truth_TauPlus_Pt);
-    Tree->Branch("Truth_TauPlus_E   ta", &m_T_Truth_TauPlus_Eta);
+    Tree->Branch("Truth_TauPlus_Eta", &m_T_Truth_TauPlus_Eta);
     Tree->Branch("Truth_TauPlus_Phi", &m_T_Truth_TauPlus_Phi);
+    Tree->Branch("Truth_TauPlus_ProdVtx_X", &m_T_Truth_TauPlus_ProdVtx_X);
+    Tree->Branch("Truth_TauPlus_ProdVtx_Y", &m_T_Truth_TauPlus_ProdVtx_Y);
+    Tree->Branch("Truth_TauPlus_ProdVtx_Z", &m_T_Truth_TauPlus_ProdVtx_Z);
     Tree->Branch("Truth_PiMinus_Pt", &m_T_Truth_PiMinus_Pt);
     Tree->Branch("Truth_PiMinus_Eta", &m_T_Truth_PiMinus_Eta);
     Tree->Branch("Truth_PiMinus_Phi", &m_T_Truth_PiMinus_Phi);
+    Tree->Branch("Truth_PiMinus_ProdVtx_X", &m_T_Truth_PiMinus_ProdVtx_X);
+    Tree->Branch("Truth_PiMinus_ProdVtx_Y", &m_T_Truth_PiMinus_ProdVtx_Y);
+    Tree->Branch("Truth_PiMinus_ProdVtx_Z", &m_T_Truth_PiMinus_ProdVtx_Z);
     Tree->Branch("Truth_PiPlus_Pt", &m_T_Truth_PiPlus_Pt);
     Tree->Branch("Truth_PiPlus_Eta", &m_T_Truth_PiPlus_Eta);
-    Tree->Branch("Truth_PiPlus_Phi", &m_T_Truth_PiPlus_Phi);    
+    Tree->Branch("Truth_PiPlus_Phi", &m_T_Truth_PiPlus_Phi);
+    Tree->Branch("Truth_PiPlus_ProdVtx_X", &m_T_Truth_PiPlus_ProdVtx_X);
+    Tree->Branch("Truth_PiPlus_ProdVtx_Y", &m_T_Truth_PiPlus_ProdVtx_Y);
+    Tree->Branch("Truth_PiPlus_ProdVtx_Z", &m_T_Truth_PiPlus_ProdVtx_Z);    
 }
