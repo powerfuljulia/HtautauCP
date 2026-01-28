@@ -94,7 +94,18 @@ The directory `TrainNN` contains code to train a Multi-layer Perceptron classifi
 cd TrainNN
 python ANN.py --EFTFile SMEFT_chwtil_VBF_H_TauTau.csv --SMFile SM_VBF_H_TauTau.csv --bkgdFile Zjets_VBF_rescaled.csv --energy 13
 ```
-
+----
+## List of References:  
+- Papers on CP violation in $H\rightarrow\tau\tau$ decay: [ATLAS](https://arxiv.org/abs/2212.05833) and [CMS](https://arxiv.org/abs/2110.04836)  
+- Papers using NN-based variables to probe for CP violation in Higgs couplings with gauge bosons (Z,W): [paper which introduced the methodology](https://arxiv.org/abs/2112.05052); [paper which used these variables for future collider projections](https://arxiv.org/abs/2511.08359)  
+- Some more general particle physics reading [here](https://drive.google.com/file/d/1URrL6JcQy_Kfl9The37rNHQ0br9OBA7x/view?usp=sharing)  
+  - CP violation - chapter 4.8 of Griffiths  
+  - Higgs boson physics - chapter 12 of "Particle Physics in the LHC era"  
+- Some Resources on Neural Networks:  
+  - A youtube playlist with video explanations: https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&si=P2h5kmGKKJ6P-hYU
+  - CERN summer student lecture on machine learning for Particle Physics: https://indico.cern.ch/event/1132551/attachments/2466415/4244610/cowan_cern_ssl22_4.pdf  
+  - More advanced lecture on machine learning for Particle Physics (from CERN-Fermilab school): https://indico.cern.ch/event/1510985/contributions/6471078/attachments/3122159/5536665/Lecture2.pdf  
+- Undergrad level lectures on particle physics - [CERN Summer Student Lectures](https://summerstudent.web.cern.ch/lectures-2022)
 ----
 
 ## Using gitlab
