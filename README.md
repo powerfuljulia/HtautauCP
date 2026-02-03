@@ -1,4 +1,4 @@
-# $H\rightarrow\tau\tau$ CP analysis with NNA
+# $H\rightarrow\tau\tau$ CP analysis with NN
 ---
 
 Basic workflow should be:
@@ -54,10 +54,10 @@ Most of the relevant settings for the process we are interested in simulating ar
 Higgs bosons get produced through different processes, most often through the fusion of two gluons (gluon-gluon fusion or ggF). Figure 11.1 of the [PDG review on the Higgs boson](https://pdg.lbl.gov/2023/reviews/rpp2023-rev-higgs-boson.pdf) shows different Higgs production mechanisms. Higgs bosons also decay in many different ways, namely pairs of fermions-antifermions (Yukawa coupling), like is the case for $H\rightarrow\tau^{+}\tau^{-}$. Table 11.3 of the same PDG review lists the rates of different Higgs decay processes.
 We are interested in probing the CP properties of the Higgs interactions to tau leptons. For that it is useful to generate the $H\rightarrow\tau^{+}\tau^{-}$ process under different CP hypotheses. Different CP admixtures in the Higgs-tau couplings can be set using the 'HiggsH1:parity' and 'HiggsH1:phiParity' parameters also described [here](https://pythia.org/latest-manual/HiggsProcesses.html).
 
-In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}\tau^{-}$, under the CP-even hypotheses. The tau leptons are also forced to decay by $\tau\rightarrow\pi\nu$. You can generate some events by doing:
+In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}\tau^{-}$, under different CP hypotheses. The tau leptons are also forced to decay by $\tau\rightarrow\pi\nu$. You can generate some events by doing:
 
 ```bash
-cd PythiaGeneration
+cd PythiaGeneration/HtautauGeneration  
 make
 ./Htautau --CPState <0/1/2> --phi <phi>
 ```
@@ -65,6 +65,14 @@ make
 **CPstate**: 0 - CP-even, 1 - CP-odd, 2 - CP mix (use with a phi angle!)  
 You should have as output a `Htautau.root` file, which is a ntuple, or ROOT tree, which is a very commonly used format for particle physics events which is widely used by physicists at CERN.
 If you want to take a look at what is the file, you can do `root Htautau.root` and it will open a root interactive session. You can then use `TBrowser b` to check the file. To leave the root interactive session just type `.q`. If you do `source runGeneration.sh` you will get a CP-even, a CP-odd and two maximally mixed ($\phi = \pm 45\degree$) samples.
+
+**NEW**: You have now also a similar directory `ZtautauGeneration` with the code to generate $Z\rightarrow\tau^{+}\tau^{-}$ events. This is also a simplified sample, where the $\tau$ leptons are forced to fecay as $\tau\rightarrow\pi\nu$. To run it, simply do (no CP-state needed):
+
+```bash
+cd PythiaGeneration/ZtautauGeneration 	
+make
+./Ztautau 
+```
 
 ## Analysis
 
