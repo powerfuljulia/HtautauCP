@@ -1,7 +1,7 @@
 #include "Htautau.h"
 
 // const unsigned int nEvents = 5000000;
-const unsigned int nEvents = 1000000;
+const unsigned int nEvents = 100000;
 
 int main(int argc, char* argv[]) {
 
@@ -21,10 +21,12 @@ int main(int argc, char* argv[]) {
       convert << argv[++i];
       convert >> phi;
     }
+
+    
     
   }
 
-  TString outputName = "Htautau.root";
+  TString outputName = "Htautau_CPeven.root";
     std::cout << "Start H->tautau decay test" << std::endl;
 
     // Set seed
@@ -49,7 +51,7 @@ int main(int argc, char* argv[]) {
     }
 
     else if(CPstate == 2){
-      outputName = "Htautau_CPmix_"+phi+".root";
+      outputName = std::string("Htautau_CPmix") + (std::stod(phi) < 0 ? "-45" : "45") +".root";
       pythia.readString("HiggsH1:parity = 4");
       pythia.readString("HiggsH1:phiParity = " + phi);
     }

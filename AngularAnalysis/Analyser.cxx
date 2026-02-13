@@ -1,4 +1,6 @@
 #include "Analyser.h"
+#include <iostream>
+
 
 TVector3 calculateImpactParamVec_Truth(const TLorentzVector Pion, const TVector3 PiProductionVtx,
 				 const TVector3 primaryVertex) {
@@ -10,8 +12,9 @@ TVector3 calculateImpactParamVec_Truth(const TLorentzVector Pion, const TVector3
   double k = (primaryVertex - initialPoint) * pionVector / pionVector.Mag2();
   // calculate impact parameter vector
   TVector3 IPVector = initialPoint + k * pionVector - primaryVertex;
+
   return IPVector;
-} //might need to add tauproduction vertices 
+}
 
 
 
@@ -48,7 +51,6 @@ float Acoplanarity_IP(TLorentzVector piPlus, TLorentzVector ipVectorPlus,
   
   return phistar;
 }
-
 
 
 float Truth_Acoplanarity_IP(const TLorentzVector PiPlus, const TVector3 PiPlusProdVtx,
@@ -104,6 +106,7 @@ int main(int argc, char *argv[])
   std::string inFileName = ""; 
   int CPstate = 0;
   std::string phi = "0.785398"; 
+  std::string inBackgroundFileName = "";
 
   for(int i=1 ; i<argc ; ++i){
     std::string argument = argv[i];
@@ -126,8 +129,14 @@ int main(int argc, char *argv[])
       convert >> inFileName;
     }
 
+    if(argument == "--inBackgroundFile"){
+      convert << argv[++i];
+      convert >> inBackgroundFileName;
+    }
+
     
   } 
+
 
 
   SetAtlasStyle();
@@ -147,6 +156,26 @@ int main(int argc, char *argv[])
 
   TTree * inTree = dynamic_cast<TTree*>(m_inputFile->Get(treeName.c_str()));
 
+  std::string backgroundTreeName = "ZtautauTree";
+
+  TFile* m_background_inputFile = nullptr;
+  TTree* backgroundTree = nullptr;
+
+  // check if background file name is provided
+  if(!inBackgroundFileName.empty()) {
+    m_background_inputFile = TFile::Open(inBackgroundFileName.c_str());
+    if (m_background_inputFile) {
+      backgroundTree = dynamic_cast<TTree*>(m_background_inputFile->Get(backgroundTreeName.c_str()));
+    }
+    else {
+      std::cout << "Unable to open background input file" << std::endl;
+      
+    }
+  } else {
+    std::cout << "No background file provided, proceeding without background comparison" << std::endl;
+  }
+  
+
   TString modifier = "";
   if (CPstate == 0){
     modifier = "_CPeven";
@@ -159,9 +188,30 @@ int main(int argc, char *argv[])
   h_Higgs_Mass = new TH1D("h_Higgs_Mass","; m(H) [GeV]; Events / 0.02 GeV",50,124.5,125.5);
   h_DiTau_VisMass = new TH1D("h_DiTau_VisMass","; visible m(#tau^{+}#tau^{-}) [GeV]; Events / 10 GeV",20,0,200);
   h_SignedAcoplanarity_IP = new TH1D("h_SignedAcoplanarity_IP"+modifier,"; #phi* [rad]; AU",18,0,TMath::TwoPi());
+  h_Phi = new TH1D("h_Phi"+modifier,"; #phi [rad]; AU", 18,-TMath::Pi(),TMath::Pi());
+  h_Eta = new TH1D("h_Eta"+modifier,"; #eta ; AU", 18,-5,5);
+  h_Pt = new TH1D("h_Pt"+modifier,"; p_{T} [GeV]; AU", 18,0,200);
   
   TreeReader * reader = new TreeReader(inTree);
   Long64_t nentries = inTree->GetEntries();
+
+  // check if backgroundTree is provided
+  TreeReader * backgroundReader = nullptr;
+  Long64_t backgroundNEntries = 0;
+
+  if (backgroundTree != nullptr) {
+    backgroundReader = new TreeReader(backgroundTree);
+    backgroundNEntries = backgroundTree->GetEntries();
+
+  // create new histograms for background data only if background file is provided
+  h_Z_Mass = new TH1D("h_Z_Mass","; m(Z) [GeV]; Events / 1 GeV",60,80,140);
+  h_DiTau_VisMass_Bkg = new TH1D("h_DiTau_VisMass_Bkg","; visible m(#tau^{+}#tau^{-}) [GeV]; Events / 10 GeV",20,0,200);
+  h_SignedAcoplanarity_IP_Bkg = new TH1D("h_SignedAcoplanarity_IP_Bkg"+modifier,"; #phi* [rad]; AU",18,0,TMath::TwoPi());
+  h_Phi_Bkg = new TH1D("h_Phi_Bkg"+modifier,"; #phi [rad]; AU", 18,-TMath::Pi(),TMath::Pi());
+  h_Eta_Bkg = new TH1D("h_Eta_Bkg"+modifier,"; #eta ; AU", 18,-5,5);
+  h_Pt_Bkg = new TH1D("h_Pt_Bkg"+modifier,"; p_{T} [GeV]; AU", 18,0,200);
+ 
+  }
 
   int eventsPercent = nentries/100;
   
@@ -178,6 +228,14 @@ int main(int argc, char *argv[])
   TVector3 TauPlusProdVtx;
   TVector3 TauMinusProdVtx; 
 
+  std::ofstream myfile;
+
+    // open CSV file for output
+    myfile.open ("Htautau_output"+ modifier +".csv");
+    std::cout << "Writing output to Htautau_output"+ modifier +".csv" << std::endl;
+    // write headers to CSV file
+    myfile << "SignedAcoplanarity,Weight,Phi_PiPlus,Phi_PiMinus,Eta_PiPlus,Eta_PiMinus,Pt_PiPlus,Pt_PiMinus,ipX_PiPlus,ipY_PiPlus,ipZ_PiPlus,ipX_PiMinus,ipY_PiMinus,ipZ_PiMinus\n";  
+
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = reader->LoadTree(jentry);
     if (ientry < 0) break;
@@ -185,7 +243,7 @@ int main(int argc, char *argv[])
     
     if((jentry % eventsPercent) == 0)
       {
-	std::cout << "Processing is: " << (jentry*100)/nentries << "\% complete" << std::endl;
+	      std::cout << "Processing is: " << (jentry*100)/nentries << "\% complete" << std::endl;
       }
     
     PiPlus.SetPtEtaPhiM(reader->Truth_PiPlus_Pt, reader->Truth_PiPlus_Eta, reader->Truth_PiPlus_Phi, 0.13957);
@@ -210,26 +268,202 @@ int main(int argc, char *argv[])
               PiMinus, PiMinusProdVtx, TauPlusProdVtx, TauMinusProdVtx);
     //fill histogram
     h_SignedAcoplanarity_IP->Fill(acoplanarity_IP);
+    myfile << acoplanarity_IP << ",";
+    
+    float weight = 0;
+
+    // convert phi to a number 
+    float phi_num = std::stof(phi);
+
+    if (phi_num < 0){
+      weight = -1;
+    } else if (phi_num > 0){
+      weight = 1;
+    } else if (phi_num == 0){
+      weight = 0;
+    }
+    myfile << weight << ",";
+  
+
+    // extract Phi for PiPlus and PiMinus
+    float Phi_PiPlus = PiPlus.Phi();
+    float Phi_PiMinus = PiMinus.Phi();
+
+    // extract Eta for PiPlus and PiMinus
+    float Eta_PiPlus = PiPlus.Eta();
+    float Eta_PiMinus = PiMinus.Eta();
+
+    // extract Pt for PiPlus and PiMinus
+    float Pt_PiPlus = PiPlus.Pt();
+    float Pt_PiMinus = PiMinus.Pt();
+
+    // fill histograms
+    h_Phi->Fill(Phi_PiPlus);
+    h_Phi->Fill(Phi_PiMinus);
+
+    h_Eta->Fill(Eta_PiPlus);
+    h_Eta->Fill(Eta_PiMinus);
+
+    h_Pt->Fill(Pt_PiPlus);
+    h_Pt->Fill(Pt_PiMinus);
+
+
+    // calculate impact parameter vector for PiPlus and PiMinus using the production vertex of the pion and the production vertex of the tau as the primary vertex
+    TLorentzVector ipVector_PiPlus(calculateImpactParamVec_Truth(PiPlus, PiPlusProdVtx, TauPlusProdVtx).Unit(), 0.);
+    TLorentzVector ipVector_PiMinus(calculateImpactParamVec_Truth(PiMinus, PiMinusProdVtx, TauMinusProdVtx).Unit(), 0.);
+
+    TLorentzVector referenceFrame = PiPlus + PiMinus;
+    PiPlus.Boost(-referenceFrame.BoostVector());
+    PiMinus.Boost(-referenceFrame.BoostVector());
+    ipVector_PiPlus.Boost(-referenceFrame.BoostVector());
+    ipVector_PiMinus.Boost(-referenceFrame.BoostVector());
+    
+
+    // extract impact parameter components for PiPlus and PiMinus
+    float ipX_PiPlus = ipVector_PiPlus.X();
+    float ipY_PiPlus = ipVector_PiPlus.Y();
+    float ipZ_PiPlus = ipVector_PiPlus.Z();
+
+    float ipX_PiMinus = ipVector_PiMinus.X();
+    float ipY_PiMinus = ipVector_PiMinus.Y();
+    float ipZ_PiMinus = ipVector_PiMinus.Z();
+
+
+  
+
+
+    // write values to CSV file
+    myfile << Phi_PiPlus << ","
+            << Phi_PiMinus << ","
+            << Eta_PiPlus << ","
+            << Eta_PiMinus << ","
+            << Pt_PiPlus << ","
+            << Pt_PiMinus << ","
+            << ipX_PiPlus << ","
+            << ipY_PiPlus << ","
+            << ipZ_PiPlus << ","
+            << ipX_PiMinus << ","
+            << ipY_PiMinus << ","
+            << ipZ_PiMinus << "\n";
+
   }    
 
+  myfile.close();
+
+  // event loop for background data, if background file is provided
+  if (backgroundTree != nullptr) {
+    for (Long64_t jentry=0; jentry<backgroundNEntries;jentry++) {
+      Long64_t ientry = backgroundReader->LoadTree(jentry);
+      if (ientry < 0) break;
+      backgroundReader->fChain->GetEntry(jentry);
+      
+      if((jentry % eventsPercent) == 0)
+      {
+    std::cout << "Processing is: " << (jentry*100)/nentries << "\% complete" << std::endl;
+      }
+        
+      PiPlus.SetPtEtaPhiM(backgroundReader->Truth_PiPlus_Pt, backgroundReader->Truth_PiPlus_Eta, backgroundReader->Truth_PiPlus_Phi, 0.13957);
+      PiMinus.SetPtEtaPhiM(backgroundReader->Truth_PiMinus_Pt, backgroundReader->Truth_PiMinus_Eta, backgroundReader->Truth_PiMinus_Phi, 0.13957);
+      Vis_DiTau = PiPlus + PiMinus;
+      h_Z_Mass->Fill(backgroundReader->Truth_Z_M);
+      h_DiTau_VisMass_Bkg->Fill(Vis_DiTau.M());
+    
+      PiPlusProdVtx.SetXYZ(backgroundReader->Truth_PiPlus_ProdVtx_X,
+          backgroundReader->Truth_PiPlus_ProdVtx_Y,
+          backgroundReader->Truth_PiPlus_ProdVtx_Z);
+      PiMinusProdVtx.SetXYZ(backgroundReader->Truth_PiMinus_ProdVtx_X,
+          backgroundReader->Truth_PiMinus_ProdVtx_Y,
+          backgroundReader->Truth_PiMinus_ProdVtx_Z);
+      TauPlusProdVtx.SetXYZ(backgroundReader->Truth_TauPlus_ProdVtx_X,
+          backgroundReader->Truth_TauPlus_ProdVtx_Y,
+          backgroundReader->Truth_TauPlus_ProdVtx_Z);   
+      TauMinusProdVtx.SetXYZ(backgroundReader->Truth_TauMinus_ProdVtx_X,
+          backgroundReader->Truth_TauMinus_ProdVtx_Y,
+          backgroundReader->Truth_TauMinus_ProdVtx_Z);
+      float acoplanarity_IP = Truth_Acoplanarity_IP(PiPlus, PiPlusProdVtx,
+                PiMinus, PiMinusProdVtx, TauPlusProdVtx, TauMinusProdVtx);
+      //fill histogram
+      h_SignedAcoplanarity_IP_Bkg->Fill(acoplanarity_IP);
+
+      // extract Phi for PiPlus and PiMinus
+      float Phi_PiPlus = PiPlus.Phi();
+      float Phi_PiMinus = PiMinus.Phi();
+
+      // extract Eta for PiPlus and PiMinus
+      float Eta_PiPlus = PiPlus.Eta();
+      float Eta_PiMinus = PiMinus.Eta();
+
+      // extract Pt for PiPlus and PiMinus
+      float Pt_PiPlus = PiPlus.Pt();
+      float Pt_PiMinus = PiMinus.Pt();
+
+      // fill histograms
+      h_Phi_Bkg->Fill(Phi_PiPlus);
+      h_Phi_Bkg->Fill(Phi_PiMinus);
+
+      h_Eta_Bkg->Fill(Eta_PiPlus);
+      h_Eta_Bkg->Fill(Eta_PiMinus);
+
+      h_Pt_Bkg->Fill(Pt_PiPlus);
+      h_Pt_Bkg->Fill(Pt_PiMinus);
+        
+
+    } 
+  }
 
 
   draw_histo(h_Higgs_Mass, "H#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Higgs_Mass" + modifier +".pdf");
   draw_histo(h_DiTau_VisMass, "H#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_VisDiTau_Mass" + modifier +".pdf");
   draw_histo(h_SignedAcoplanarity_IP, "H#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_SignedAcoplanarity_IP_CPodd" + modifier + ".pdf");
+  draw_histo(h_Phi, "H#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Phi" + modifier + ".pdf");
+  draw_histo(h_Eta, "H#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Eta" + modifier + ".pdf");
+  draw_histo(h_Pt, "H#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Pt" + modifier + ".pdf");
+
 
   TFile* outputFile = new TFile("AnalyserOutput"+ modifier +".root", "RECREATE");
   outputFile->cd();
-  h_SignedAcoplanarity_IP->Write();
+  h_SignedAcoplanarity_IP->Write("h_SignedAcoplanarity_IP"+modifier);
+  h_Phi->Write("h_Phi"+modifier);
+  h_Eta->Write("h_Eta"+modifier);
+  h_Pt->Write("h_Pt"+modifier);
+  h_DiTau_VisMass->Write("h_DiTau_VisMass"+modifier);
   outputFile->Close();
 
+  if (m_background_inputFile != nullptr) {
+        // Check if all background histograms are initialized
+    if (h_Z_Mass && h_DiTau_VisMass_Bkg && h_SignedAcoplanarity_IP_Bkg && h_Phi_Bkg && h_Eta_Bkg && h_Pt_Bkg && h_DiTau_VisMass_Bkg) {
+    // draw histograms for background data comparison
+      draw_histo(h_Z_Mass, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Z_Mass_Background.pdf");
+      draw_histo(h_DiTau_VisMass_Bkg, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_VisDiTau_Mass_Background.pdf");
+      draw_histo(h_SignedAcoplanarity_IP_Bkg, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_SignedAcoplanarity_IP_Background.pdf");
+      draw_histo(h_Phi_Bkg, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Phi_Background.pdf");
+      draw_histo(h_Eta_Bkg, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Eta_Background.pdf");
+      draw_histo(h_Pt_Bkg, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Pt_Background.pdf");
+
+      // save histograms for main input and background data
+      TFile* background_outputFile = new TFile("AnalyserOutput_Background.root", "RECREATE");
+      background_outputFile->cd();
+      h_SignedAcoplanarity_IP_Bkg->Write("h_SignedAcoplanarity_IP_Bkg");
+      h_Phi_Bkg->Write("h_Phi_Bkg");
+      h_Eta_Bkg->Write("h_Eta_Bkg");
+      h_Pt_Bkg->Write("h_Pt_Bkg");
+      h_DiTau_VisMass_Bkg->Write("h_DiTau_VisMass_Bkg");
+
+      background_outputFile->Close();
+      m_background_inputFile->Close();
+    } else {
+        std::cerr << "Error: One or more background histograms are null!" << std::endl;
+    }
+  }
+  else {
+    std::cout << "No background file provided, skipping background histogram drawing and saving" << std::endl;
+  }
   m_inputFile->Close();
 
+
+
+
   return 0;
- 
-  
-
-
 
 
 }

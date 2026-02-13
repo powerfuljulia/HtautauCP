@@ -47,6 +47,11 @@ public :
    Double_t Truth_PiPlus_ProdVtx_X;
    Double_t Truth_PiPlus_ProdVtx_Y;
    Double_t Truth_PiPlus_ProdVtx_Z;
+   Double_t Truth_Z_M;
+   Double_t Truth_Z_Pt;
+   Double_t Truth_Z_Eta;
+   Double_t Truth_Z_Phi;
+
 
    // List of branches
    TBranch        *b_Truth_Higgs_Pt;   //!
@@ -77,6 +82,11 @@ public :
    TBranch        *b_Truth_PiPlus_ProdVtx_X;   //!
    TBranch        *b_Truth_PiPlus_ProdVtx_Y;   //!
    TBranch        *b_Truth_PiPlus_ProdVtx_Z;   //
+   TBranch        *b_Truth_Z_M;   //!
+   TBranch        *b_Truth_Z_Pt;   //!
+   TBranch        *b_Truth_Z_Eta;   //!
+   TBranch        *b_Truth_Z_Phi;   //!
+
 
    TreeReader(TTree *tree=0);
    virtual ~TreeReader();

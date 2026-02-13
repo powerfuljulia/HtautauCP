@@ -118,6 +118,10 @@ void TreeReader::Init(TTree *tree)
    fChain->SetBranchAddress("Truth_PiPlus_ProdVtx_X", &Truth_PiPlus_ProdVtx_X, &b_Truth_PiPlus_ProdVtx_X);
    fChain->SetBranchAddress("Truth_PiPlus_ProdVtx_Y", &Truth_PiPlus_ProdVtx_Y, &b_Truth_PiPlus_ProdVtx_Y);
    fChain->SetBranchAddress("Truth_PiPlus_ProdVtx_Z", &Truth_PiPlus_ProdVtx_Z, &b_Truth_PiPlus_ProdVtx_Z);  
+   fChain->SetBranchAddress("Truth_Z_M", &Truth_Z_M, &b_Truth_Z_M);
+   fChain->SetBranchAddress("Truth_Z_Pt", &Truth_Z_Pt, &b_Truth_Z_Pt);
+   fChain->SetBranchAddress("Truth_Z_Eta", &Truth_Z_Eta, &b_Truth_Z_Eta);
+   fChain->SetBranchAddress("Truth_Z_Phi", &Truth_Z_Phi, &b_Truth_Z_Phi);
 
    Notify();
 }
