@@ -1,0 +1,81 @@
+# ============================
+#   C++ BUILD ARTIFACTS
+# ============================
+
+# Compiled object files
+*.o
+*.obj
+
+# Compiled dynamic libraries
+*.so
+*.dll
+*.dylib
+
+# Compiled static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake build directories
+build/
+cmake-build-*/
+
+# Makefile artifacts
+Makefile
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+
+# ============================
+#   PYTHON ARTIFACTS
+# ============================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# ============================
+#   OS / EDITOR FILES
+# ============================
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# JetBrains IDEs
+.idea/
+
+# ============================
+#   OPTIONAL (UNCOMMENT IF NEEDED)
+# ============================
+
+# Logs
+# *.log
+
+# Local config files
+# *.env
+# config.local.json
