@@ -116,14 +116,14 @@ python ANN.py --EFTFile SMEFT_chwtil_VBF_H_TauTau.csv --SMFile SM_VBF_H_TauTau.c
 - Undergrad level lectures on particle physics - [CERN Summer Student Lectures](https://summerstudent.web.cern.ch/lectures-2022)
 ----
 
-## Using gitlab
-
-Some notes on working with gitlab:
+## Using git
 
 ```bash
 
 # work on code
 git add <file>
 git commit -m "message"
-git push -u origin_github ella_dev
+git push -u <remote> <dev-branch>
 ```
+
+In this case we have named the remote repo "origin_github" and the dev branch "ella_dev"
