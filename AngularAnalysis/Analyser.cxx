@@ -276,10 +276,12 @@ int main(int argc, char *argv[])
 
     if (phi_num < 0){
       weight = -1;
-    } else if (phi_num > 0){
+    } else if (phi_num > 0 && phi_num < 90){
       weight = 1;
     } else if (phi_num == 0){
       weight = 0;
+    } else if (phi_num == 90){
+      weight = 2;
     }
     myfile << weight << ",";
   
