@@ -66,7 +66,7 @@ y_odd = df_odd['Weight'].values
 y_pos[y_pos>0]=1
 y_neg[y_neg<0]=0 
 y_even[y_even==0]=2
-y_odd[y_odd==0]=3
+y_odd[y_odd==2]=3
 
 
 X_pos = X_pos
