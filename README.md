@@ -121,19 +121,9 @@ python ANN.py --EFTFile SMEFT_chwtil_VBF_H_TauTau.csv --SMFile SM_VBF_H_TauTau.c
 Some notes on working with gitlab:
 
 ```bash
-#Fork repo on GitLab/GitHub  
-  
-git clone https://gitlab.com/<you>/<repo>.git
-cd repo
-
-git checkout -b my-feature-branch
-
-# (optional) sync with original repo
-git remote add upstream https://gitlab.com/<original>/<repo>.git
-git pull upstream main
 
 # work on code
-git add .
+git add <file>
 git commit -m "message"
-git push -u origin my-feature-branch
+git push -u origin_github ella_dev
 ```
