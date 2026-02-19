@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
   int CPstate = 0;
   std::string phi = "0.785398"; 
   std::string inBackgroundFileName = "";
-
   for(int i=1 ; i<argc ; ++i){
     std::string argument = argv[i];
     std::stringstream convert;
@@ -185,7 +184,7 @@ int main(int argc, char *argv[])
     modifier = "_CPmix_phi"+phi;
   }
   
-  h_Higgs_Mass = new TH1D("h_Higgs_Mass","; m(H) [GeV]; Events / 0.02 GeV",50,124.5,125.5);
+  h_Higgs_Mass = new TH1D("h_Higgs_Mass","; m(H) [GeV]; Events / 0.02 GeV",60,80,130);
   h_DiTau_VisMass = new TH1D("h_DiTau_VisMass","; visible m(#tau^{+}#tau^{-}) [GeV]; Events / 10 GeV",20,0,200);
   h_SignedAcoplanarity_IP = new TH1D("h_SignedAcoplanarity_IP"+modifier,"; #phi* [rad]; AU",18,0,TMath::TwoPi());
   h_Phi = new TH1D("h_Phi"+modifier,"; #phi [rad]; AU", 18,-TMath::Pi(),TMath::Pi());
@@ -204,7 +203,7 @@ int main(int argc, char *argv[])
     backgroundNEntries = backgroundTree->GetEntries();
 
   // create new histograms for background data only if background file is provided
-  h_Z_Mass = new TH1D("h_Z_Mass","; m(Z) [GeV]; Events / 1 GeV",60,80,140);
+  h_Z_Mass = new TH1D("h_Z_Mass","; m(Z) [GeV]; Events / 1 GeV",60,80,130);
   h_DiTau_VisMass_Bkg = new TH1D("h_DiTau_VisMass_Bkg","; visible m(#tau^{+}#tau^{-}) [GeV]; Events / 10 GeV",20,0,200);
   h_SignedAcoplanarity_IP_Bkg = new TH1D("h_SignedAcoplanarity_IP_Bkg"+modifier,"; #phi* [rad]; AU",18,0,TMath::TwoPi());
   h_Phi_Bkg = new TH1D("h_Phi_Bkg"+modifier,"; #phi [rad]; AU", 18,-TMath::Pi(),TMath::Pi());
@@ -307,17 +306,28 @@ int main(int argc, char *argv[])
     h_Pt->Fill(Pt_PiPlus);
     h_Pt->Fill(Pt_PiMinus);
 
-
     // calculate impact parameter vector for PiPlus and PiMinus using the production vertex of the pion and the production vertex of the tau as the primary vertex
-    TLorentzVector ipVector_PiPlus(calculateImpactParamVec_Truth(PiPlus, PiPlusProdVtx, TauPlusProdVtx).Unit(), 0.);
-    TLorentzVector ipVector_PiMinus(calculateImpactParamVec_Truth(PiMinus, PiMinusProdVtx, TauMinusProdVtx).Unit(), 0.);
+    // use TVector3
+    
+  /*
+    TVector3 ipVector_PiPlus3 = calculateImpactParamVec_Truth(PiPlus, PiPlusProdVtx, TauPlusProdVtx);
+    TVector3 ipVector_PiMinus3 = calculateImpactParamVec_Truth(PiMinus, PiMinusProdVtx, TauMinusProdVtx);
+    std::cout << "ipVector_PiPlus3: " << ipVector_PiPlus3.X() << ", " << ipVector_PiPlus3.Y() << ", " << ipVector_PiPlus3.Z() << std::endl;
+*/
 
+    TLorentzVector ipVector_PiPlus(calculateImpactParamVec_Truth(PiPlus, PiPlusProdVtx, TauPlusProdVtx).Unit(), 0.);
+    TLorentzVector ipVector_PiMinus(calculateImpactParamVec_Truth(PiMinus, PiMinusProdVtx, TauMinusProdVtx).Unit(), 0.); 
+   // std::cout << "ipVector_PiPlus: " << ipVector_PiPlus.X() << ", " << ipVector_PiPlus.Y() << ", " << ipVector_PiPlus.Z() << std::endl;
+
+    // boost vectors into rest frame
+    /*
     TLorentzVector referenceFrame = PiPlus + PiMinus;
     PiPlus.Boost(-referenceFrame.BoostVector());
     PiMinus.Boost(-referenceFrame.BoostVector());
     ipVector_PiPlus.Boost(-referenceFrame.BoostVector());
     ipVector_PiMinus.Boost(-referenceFrame.BoostVector());
-    
+    */
+
 
     // extract impact parameter components for PiPlus and PiMinus
     float ipX_PiPlus = ipVector_PiPlus.X();
@@ -329,7 +339,10 @@ int main(int argc, char *argv[])
     float ipZ_PiMinus = ipVector_PiMinus.Z();
 
 
-  
+    // set pion mass explicitly
+    float PionMass = 0.13957;
+    // set visible di-tau mass explicitly
+    float Vis_DiTau_Mass = Vis_DiTau.M();
 
 
     // write values to CSV file
@@ -427,11 +440,12 @@ int main(int argc, char *argv[])
   h_Eta->Write("h_Eta"+modifier);
   h_Pt->Write("h_Pt"+modifier);
   h_DiTau_VisMass->Write("h_DiTau_VisMass"+modifier);
+  h_Higgs_Mass->Write("h_Higgs_Mass"+modifier);
   outputFile->Close();
 
   if (m_background_inputFile != nullptr) {
         // Check if all background histograms are initialized
-    if (h_Z_Mass && h_DiTau_VisMass_Bkg && h_SignedAcoplanarity_IP_Bkg && h_Phi_Bkg && h_Eta_Bkg && h_Pt_Bkg && h_DiTau_VisMass_Bkg) {
+    if (h_Z_Mass && h_DiTau_VisMass_Bkg && h_SignedAcoplanarity_IP_Bkg && h_Phi_Bkg && h_Eta_Bkg && h_Pt_Bkg && h_DiTau_VisMass_Bkg && h_Z_Mass) {
     // draw histograms for background data comparison
       draw_histo(h_Z_Mass, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_Z_Mass_Background.pdf");
       draw_histo(h_DiTau_VisMass_Bkg, "Z#rightarrow#tau(#rightarrow#pi#nu)#tau(#rightarrow#pi#nu)", "Truth_VisDiTau_Mass_Background.pdf");
@@ -448,6 +462,7 @@ int main(int argc, char *argv[])
       h_Eta_Bkg->Write("h_Eta_Bkg");
       h_Pt_Bkg->Write("h_Pt_Bkg");
       h_DiTau_VisMass_Bkg->Write("h_DiTau_VisMass_Bkg");
+      h_Z_Mass->Write("h_Z_Mass");
 
       background_outputFile->Close();
       m_background_inputFile->Close();
