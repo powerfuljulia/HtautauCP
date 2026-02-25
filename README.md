@@ -1,4 +1,4 @@
-# $H\rightarrow\tau\tau$ CP analysis with NNA
+# $H\rightarrow\tau\tau$ CP analysis with NN
 ---
 
 Basic workflow should be:
@@ -54,10 +54,10 @@ Most of the relevant settings for the process we are interested in simulating ar
 Higgs bosons get produced through different processes, most often through the fusion of two gluons (gluon-gluon fusion or ggF). Figure 11.1 of the [PDG review on the Higgs boson](https://pdg.lbl.gov/2023/reviews/rpp2023-rev-higgs-boson.pdf) shows different Higgs production mechanisms. Higgs bosons also decay in many different ways, namely pairs of fermions-antifermions (Yukawa coupling), like is the case for $H\rightarrow\tau^{+}\tau^{-}$. Table 11.3 of the same PDG review lists the rates of different Higgs decay processes.
 We are interested in probing the CP properties of the Higgs interactions to tau leptons. For that it is useful to generate the $H\rightarrow\tau^{+}\tau^{-}$ process under different CP hypotheses. Different CP admixtures in the Higgs-tau couplings can be set using the 'HiggsH1:parity' and 'HiggsH1:phiParity' parameters also described [here](https://pythia.org/latest-manual/HiggsProcesses.html).
 
-In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}\tau^{-}$, under the CP-even hypotheses. The tau leptons are also forced to decay by $\tau\rightarrow\pi\nu$. You can generate some events by doing:
+In `PythiaGeneration` you have an example of generation of $H\rightarrow\tau^{+}\tau^{-}$, under different CP hypotheses. The tau leptons are also forced to decay by $\tau\rightarrow\pi\nu$. You can generate some events by doing:
 
 ```bash
-cd PythiaGeneration
+cd PythiaGeneration/HtautauGeneration  
 make
 ./Htautau --CPState <0/1/2> --phi <phi>
 ```
@@ -65,6 +65,14 @@ make
 **CPstate**: 0 - CP-even, 1 - CP-odd, 2 - CP mix (use with a phi angle!)  
 You should have as output a `Htautau.root` file, which is a ntuple, or ROOT tree, which is a very commonly used format for particle physics events which is widely used by physicists at CERN.
 If you want to take a look at what is the file, you can do `root Htautau.root` and it will open a root interactive session. You can then use `TBrowser b` to check the file. To leave the root interactive session just type `.q`. If you do `source runGeneration.sh` you will get a CP-even, a CP-odd and two maximally mixed ($\phi = \pm 45\degree$) samples.
+
+**NEW**: You have now also a similar directory `ZtautauGeneration` with the code to generate $Z\rightarrow\tau^{+}\tau^{-}$ events. This is also a simplified sample, where the $\tau$ leptons are forced to fecay as $\tau\rightarrow\pi\nu$. To run it, simply do (no CP-state needed):
+
+```bash
+cd PythiaGeneration/ZtautauGeneration 	
+make
+./Ztautau 
+```
 
 ## Analysis
 
@@ -88,33 +96,59 @@ To train the neural network we will use 'scikit-learn', so it should be installe
 conda install scikit-learn
 ```
 
-The directory `TrainNN` contains code to train a Multi-layer Perceptron classifier using the module [MLPClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html) from sklearn. This code was used to train a NN used to probe for CP violation in the Higgs gauge boson couplings in vector boson fusion (VBF) production of the Higgs. It was used to derive the results in section 8 of this [paper](https://arxiv.org/abs/2511.08359). The methodology is used is described in this earlier [paper](https://arxiv.org/abs/2112.05052). The exact inputs which were used are also available in this repo. You can run the training using
+The directory `TrainNN` contains code to train a Multi-layer Perceptron classifier using the module [MLPClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html) from sklearn. A similar code was previosly used to train a NN used to probe for CP violation in the Higgs gauge boson couplings in vector boson fusion (VBF) production of the Higgs. It was used to derive the results in section 8 of this [paper](https://arxiv.org/abs/2511.08359). The methodology is used is described in this earlier [paper](https://arxiv.org/abs/2112.05052). The exact inputs which were used are also available in this repo. You can run the training using
 
 ```bash
 cd TrainNN
-python ANN.py --EFTFile SMEFT_chwtil_VBF_H_TauTau.csv --SMFile SM_VBF_H_TauTau.csv --bkgdFile Zjets_VBF_rescaled.csv --energy 13
+python ANN.py --PosIntFile ../AngularAnalysis/Htautau_output_CPmix_phi45.csv --NegIntFile ../AngularAnalysis/Htautau_output_CPmix_phi-45.csv --EvenFile ../AngularAnalysis/Htautau_output_CPeven.csv --OddFile ../AngularAnalysis/Htautau_output_CPodd.csv
 ```
+
+## Trial-and-Error: Developing the Training
+
+What can we update/test to try and make the training better?
+- Input Variables - does it make a difference to boost into the reference frame of the Higgs before training? - compare just giving the normalised impact parameters X,Y,Z vs normalised + boosted
+- Normalise Inputs - normalise inputs by default so that features have a similar scale, by trying out [StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html)  
+- Optimise hyperparameters - we can either manually try different numbers of layers/nodes (hidden_layer_sizes) etc, or we can try something like [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html)
+- As we optimise, make sure we are not overfitting - through validation loss tracking (example below); comparing the training and validation accuracy after training (is training accuracy significantly higher than validation accuracy?); and through regularisation (alpha parameter added to MLPClassifier instantiation) 
+
+```
+# Define the classifier with early stopping to monitor validation loss
+classifier = MLPClassifier(
+    hidden_layer_sizes=(100, 50, 20),
+    max_iter=1000,
+    activation='relu',
+    solver='adam',
+    random_state=1,
+    batch_size=5000,
+    early_stopping=True,  # Stops training when validation score stops improving
+    validation_fraction=0.2,  # Reserve 20% of training data for validation
+    n_iter_no_change=10  # Stop if no improvement for 10 iterations
+)
+```
+
 
 ----
+## List of References:  
+- Papers on CP violation in $H\rightarrow\tau\tau$ decay: [ATLAS](https://arxiv.org/abs/2212.05833) and [CMS](https://arxiv.org/abs/2110.04836)  
+- Papers using NN-based variables to probe for CP violation in Higgs couplings with gauge bosons (Z,W): [paper which introduced the methodology](https://arxiv.org/abs/2112.05052); [paper which used these variables for future collider projections](https://arxiv.org/abs/2511.08359)  
+- Some more general particle physics reading [here](https://drive.google.com/file/d/1URrL6JcQy_Kfl9The37rNHQ0br9OBA7x/view?usp=sharing)  
+  - CP violation - chapter 4.8 of Griffiths  
+  - Higgs boson physics - chapter 12 of "Particle Physics in the LHC era"  
+- Some Resources on Neural Networks:  
+  - A youtube playlist with video explanations: https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&si=P2h5kmGKKJ6P-hYU
+  - CERN summer student lecture on machine learning for Particle Physics: https://indico.cern.ch/event/1132551/attachments/2466415/4244610/cowan_cern_ssl22_4.pdf  
+  - More advanced lecture on machine learning for Particle Physics (from CERN-Fermilab school): https://indico.cern.ch/event/1510985/contributions/6471078/attachments/3122159/5536665/Lecture2.pdf  
+- Undergrad level lectures on particle physics - [CERN Summer Student Lectures](https://summerstudent.web.cern.ch/lectures-2022)
+----
 
-## Using gitlab
-
-Some notes on working with gitlab:
+## Using git
 
 ```bash
-#Fork repo on GitLab/GitHub  
-  
-git clone https://gitlab.com/<you>/<repo>.git
-cd repo
-
-git checkout -b my-feature-branch
-
-# (optional) sync with original repo
-git remote add upstream https://gitlab.com/<original>/<repo>.git
-git pull upstream main
 
 # work on code
-git add .
+git add <file>
 git commit -m "message"
-git push -u origin my-feature-branch
+git push -u <remote> <dev-branch>
 ```
+
+In this case we have named the remote repo "origin_github" and the dev branch right now is "ella_dev"
