@@ -106,11 +106,11 @@ python ANN.py --PosIntFile ../AngularAnalysis/Htautau_output_CPmix_phi45.csv --N
 ## Trial-and-Error: Developing the Training
 
 Test Extrapolation:
-- For this check we need also samples for phi = -20 degrees & phi = + 20 degrees
-- Train on only phi = -45 & phi = 45
-  - plot $O_{NN}$ for phi = -45, -20, 0, 20, 45 , 90
-- Train on only phi = -45, 0, 45, 90
-  - plot $O_{NN}$ for phi = -45, -20, 0, 20, 45	, 90
+- For this check we need also samples for $\phi = -20 \degree$  & $\phi = +20 \degree$
+- Train on only $\phi = -45 \degree$ and $\phi = +45 \degree$ 
+  - plot $O_{NN}$ for $\phi = -45 \degree$, $\phi = -20 \degree$, $\phi = 0 \degree$, $\phi = 20 \degree$, $\phi = 45 \degree$, $\phi = 90 \degree$
+- Train on $\phi = -45 \degree$, $\phi = 0 \degree$, $\phi = +45 \degree$, $\phi = 90 \degree$
+  - plot $O_{NN}$ for $\phi = -45 \degree$, $\phi = -20 \degree$, $\phi = 0 \degree$, $\phi = 20 \degree$, $\phi = 45 \degree$,	$\phi = 90 \degree$
 
 How do things look?  
 
@@ -168,4 +168,4 @@ git commit -m "message"
 git push -u <remote> <dev-branch>
 ```
 
-In this case we have named the remote repo "origin_github" and the dev branch right now is "ella_dev"
+In this case we have named the remote repo "origin_github" and the dev branch right now is "ella_dev"B
