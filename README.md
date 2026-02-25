@@ -105,6 +105,15 @@ python ANN.py --PosIntFile ../AngularAnalysis/Htautau_output_CPmix_phi45.csv --N
 
 ## Trial-and-Error: Developing the Training
 
+Test Extrapolation:
+- For this check we need also samples for phi = -20 degrees & phi = + 20 degrees
+- Train on only phi = -45 & phi = 45
+  - plot $O_{NN}$ for phi = -45, -20, 0, 20, 45 , 90
+- Train on only phi = -45, 0, 45, 90
+  - plot $O_{NN}$ for phi = -45, -20, 0, 20, 45	, 90
+
+How do things look?  
+
 What can we update/test to try and make the training better?
 - **Input Variables**
   - does it make a difference to boost into the reference frame of the Higgs before training? - compare just giving the normalised impact parameters X,Y,Z vs normalised + boosted
