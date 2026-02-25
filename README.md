@@ -106,10 +106,18 @@ python ANN.py --PosIntFile ../AngularAnalysis/Htautau_output_CPmix_phi45.csv --N
 ## Trial-and-Error: Developing the Training
 
 What can we update/test to try and make the training better?
-- Input Variables - does it make a difference to boost into the reference frame of the Higgs before training? - compare just giving the normalised impact parameters X,Y,Z vs normalised + boosted
-- Normalise Inputs - normalise inputs by default so that features have a similar scale, by trying out [StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html)  
-- Optimise hyperparameters - we can either manually try different numbers of layers/nodes (hidden_layer_sizes) etc, or we can try something like [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html)
-- As we optimise, make sure we are not overfitting - through validation loss tracking (example below); comparing the training and validation accuracy after training (is training accuracy significantly higher than validation accuracy?); and through regularisation (alpha parameter added to MLPClassifier instantiation) 
+- **Input Variables**
+  - does it make a difference to boost into the reference frame of the Higgs before training? - compare just giving the normalised impact parameters X,Y,Z vs normalised + boosted
+  - add SignedAcoplanarity as training variable, add other visble Higgs variables
+- **Normalise Inputs**
+  - normalise inputs by default so that features have a similar scale, by trying out [StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html)  
+- **Optimise hyperparameters**
+  - either manually try different numbers of layers/nodes (hidden_layer_sizes) etc
+  - or try something like [GridSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html)
+- **overfitting checks** as we optimise 
+  - validation loss tracking (example below)
+  - comparing the training and validation accuracy after training (is training accuracy significantly higher than validation accuracy?)
+  - regularisation (alpha parameter added to MLPClassifier instantiation) 
 
 ```
 # Define the classifier with early stopping to monitor validation loss
