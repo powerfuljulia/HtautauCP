@@ -9,6 +9,8 @@ from ROOT import gROOT
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
 
 import matplotlib.pyplot as plt
 
@@ -17,85 +19,79 @@ import os
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Process input files.')
-parser.add_argument('--PosIntFile', type=str, required=True, help='Path to the +45 CSV file')
-parser.add_argument('--NegIntFile', type=str, required=True, help='Path to the -45 CSV file')
-parser.add_argument('--EvenFile', type=str, required=True, help='Path to the even CSV file')
-parser.add_argument('--OddFile', type=str, required=True, help='Path to the odd CSV file')
-parser.add_argument('--Pos20IntFile', type=str, required=True, help='Path to the 20 interference CSV file')
-parser.add_argument('--Neg20IntFile', type=str, required=True, help='Path to the -20 interference CSV file')
+parser.add_argument('--phiVals', type=str, required=True, help='Comma-separated list of phi values to process (eg. +45,-45)')
+parser.add_argument('--InputFileList', type=str, required=False, default='file_list.txt', help='Path to the text file containing list of phi values and file paths')
 
 args = parser.parse_args()
 
-# define input names
-pos_interference_file = args.PosIntFile
-neg_interference_file = args.NegIntFile
-even_file = args.EvenFile 
-odd_file = args.OddFile
-pos_20_interference_file = args.Pos20IntFile
-neg_20_interference_file = args.Neg20IntFile
+# read input file list
+input_file_list = args.InputFileList
+
+# get phi values from command line
+selected_phi_values = args.phiVals.split(',')
+
+# create a dictionary to store the file paths and corresponding phi values
+dataframes = {}
+
+# initialise scaler
+scaler = StandardScaler()
+
+# read the input file list and load data
+with open(input_file_list, 'r') as file:
+    for line in file:
+        phi, file_path = line.strip().split(',')
+
+        # strip any whitespace from phi and file_path
+        phi = phi.strip()
+        file_path = file_path.strip()
+        # check if current phi value is in selected list
+        if phi in selected_phi_values:
+            print(f'processing phi={phi}: {file_path}')
+            # load csv file into dataframe
+            df = pd.read_csv(file_path)
+
+            # store dataframe in dictionary with phi as key
+            dataframes[phi] = df
+
+        else:
+            print(f'Phi value {phi} not in selected list, skipping file {file_path}')
+
+# define input features and target variable dynamically based on the columns in the dataframes
+X = {}
+y = {}
+
+# create mapping for phi values
+phi_to_weight = {phi: idx for idx, phi in enumerate(selected_phi_values)}
+
+# loop through dataframes
+for phi, df in dataframes.items():
+    X[phi] = df[['SignedAcoplanarity'
+                 #, 'Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus', 'Pt_PiMinus'
+                 #, 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus'
+                 ]].values
+    weight = phi_to_weight[phi]
+    y[phi] = np.full(df['Weight'].shape, weight)
 
 
-# import interference data
-df_pos = pd.read_csv(pos_interference_file)
-print(df_pos.columns)
-df_neg = pd.read_csv(neg_interference_file)
-print(df_neg.columns)
-df_even = pd.read_csv(even_file)
-df_odd = pd.read_csv(odd_file)
-df_pos_20 = pd.read_csv(pos_20_interference_file)
-df_neg_20 = pd.read_csv(neg_20_interference_file)  
+    #df['Pt_PiPlus_log']=np.log10(df['Pt_PiPlus'])
+    #df['Pt_PiMinus_log']=np.log10(df['Pt_PiMinus'])
+
+# dictionary to store scaled data
+X_scaled = {}
+
+# loop through all phi values and scale input variables
+for phi, X_phi in X.items():
+    X_scaled[phi] = scaler.fit_transform(X_phi)
 
 
-#scale the data to avoid large values. Ideally replace this with a MinMaxScaler
-# only scaled Pt, not sure if other variables need scaling
-df_pos['Pt_PiPlus_log']=np.log10(df_pos['Pt_PiPlus'])
-df_pos['Pt_PiMinus_log']=np.log10(df_pos['Pt_PiMinus'])
-df_neg['Pt_PiPlus_log']=np.log10(df_neg['Pt_PiPlus'])
-df_neg['Pt_PiMinus_log']=np.log10(df_neg['Pt_PiMinus'])
-df_even['Pt_PiPlus_log']=np.log10(df_even['Pt_PiPlus'])
-df_even['Pt_PiMinus_log']=np.log10(df_even['Pt_PiMinus'])
-df_odd['Pt_PiPlus_log']=np.log10(df_odd['Pt_PiPlus'])
-df_odd['Pt_PiMinus_log']=np.log10(df_odd['Pt_PiMinus'])
-df_pos_20['Pt_PiPlus_log']=np.log10(df_pos_20['Pt_PiPlus'])
-df_pos_20['Pt_PiMinus_log']=np.log10(df_pos_20['Pt_PiMinus'])
-df_neg_20['Pt_PiPlus_log']=np.log10(df_neg_20['Pt_PiPlus'])
-df_neg_20['Pt_PiMinus_log']=np.log10(df_neg_20['Pt_PiMinus'])
-
-print(df_pos.columns)
-print(df_neg.columns)
-
-# determine the input features and target variable
-X_pos = df_pos[['Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus_log', 'Pt_PiMinus_log', 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus']].values
-X_neg = df_neg[['Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus_log', 'Pt_PiMinus_log', 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus']].values
-X_even = df_even[['Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus_log', 'Pt_PiMinus_log', 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus']].values
-X_odd = df_odd[['Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus_log', 'Pt_PiMinus_log', 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus']].values
-X_pos_20 = df_pos_20[['Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus_log', 'Pt_PiMinus_log', 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus']].values
-X_neg_20 = df_neg_20[['Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus_log', 'Pt_PiMinus_log', 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus']].values
-y_pos = df_pos['Weight'].values
-y_neg = df_neg['Weight'].values
-y_even = df_even['Weight'].values
-y_odd = df_odd['Weight'].values
-y_pos_20 = df_pos_20['Weight'].values
-y_neg_20 = df_neg_20['Weight'].values
-y_pos[y_pos>0]=1
-y_neg[y_neg<0]=0 
-y_even[y_even==0]=2
-y_odd[y_odd==2]=3
-y_pos_20[y_pos_20>0]=4
-y_neg_20[y_neg_20<0]=5
-
-
-X_pos = X_pos
-X_neg = X_neg
-X_even = X_even
-X_odd = X_odd
-X_pos_20 = X_pos_20
-X_neg_20 = X_neg_20
-names = ['Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus_log', 'Pt_PiMinus_log', 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus']
+names = ['SignedAcoplanarity'
+        #, 'Phi_PiPlus', 'Phi_PiMinus', 'Eta_PiPlus', 'Eta_PiMinus', 'Pt_PiPlus', 'Pt_PiMinus'
+        # , 'ipX_PiPlus', 'ipY_PiPlus', 'ipZ_PiPlus', 'ipX_PiMinus', 'ipY_PiMinus', 'ipZ_PiMinus'
+         ]
 
 #combine the positive and negative samples for multiclass classification
-X_tot=np.concatenate((X_pos, X_neg, X_even, X_odd))
-y_tot=np.concatenate((y_pos, y_neg, y_even, y_odd))
+X_tot=np.concatenate((X_scaled['+45'], X_scaled['-45']))
+y_tot=np.concatenate((y['+45'], y['-45']))
 
 
 # split data to train/val/test, this is for binary classification
@@ -116,13 +112,70 @@ for key,val in y_dict.items():
     print(f'{key} :')
     print(f'\tclass 0 = {100.*(val==0).sum()/len(val):.1f}%')
 
+# define parameter grid for hyperparameter tuning
+
+param_grid = {
+    'hidden_layer_sizes': [(200,100,50,20), (500,200,100,50), (500,200,100,20)],
+    'activation': ['relu'],
+    'solver': ['adam'],
+    'batch_size': [5000],
+    'max_iter': [500],
+    'alpha': [0.001],  # L2 regularization parameter
+}
+
     
 # define the classifier and train it
-classifier = MLPClassifier(hidden_layer_sizes=(100,50,20), max_iter=1000,activation = 'relu',solver='adam',random_state=1,batch_size=5000)
+
+
+# add early stopping to monitor the validation loss and prevent overfitting
+classifier = MLPClassifier(hidden_layer_sizes=(100,50,20), max_iter=1000,activation = 'relu',solver='adam',random_state=1,batch_size=5000,
+                           #early_stopping=True, # stops training when validation score is not improving
+                           #validation_fraction=0., # fraction of training data to set aside as validation set for early stopping
+                           #n_iter_no_change=20
+                           )
+                            # stop if no improvement in validation score for 10 iterations
 classifier.fit(X_train, y_train, )
+"""
+
+# define the classifier and perform hyperparameter tuning using GridSearchCV
+# add early stopping to monitor the validation loss and prevent overfitting
+classifier = MLPClassifier(random_state=1, early_stopping=True, validation_fraction=0.2, n_iter_no_change=10)
+grid_search = GridSearchCV(estimator=classifier, param_grid=param_grid, cv=3, n_jobs=1, verbose=2)
+grid_search.fit(X_train, y_train)
+
+# print scores of each hyperparameter combination
+print("\nGrid Search Scores:")
+for mean, params in zip(grid_search.cv_results_['mean_test_score'], grid_search.cv_results_['params']):
+    print(f"Mean Test Score: {mean:.4f} for Hyperparameters: {params}")
+
+
+
+# print the best hyperparameters and best score
+print("Best Hyperparameters:", grid_search.best_params_)
+print("Best Score:", grid_search.best_score_)
+
+# evaluate best model on validation set
+classifier = grid_search.best_estimator_
+"""
+
+# training accuracy
+train_accuracy = classifier.score(X_train, y_train)
+print(f'Training Accuracy: {train_accuracy:.4f}')
+
+# validation accuracy
+val_accuracy = classifier.score(X_val, y_val)
+print(f'Validation Accuracy: {val_accuracy:.4f}')
+
+# compare training and validation accuracy
+if train_accuracy > val_accuracy:
+    print('Training accuracy is higher than validation accuracy, model may be overfitting.')
+else:
+    print('Training and validation accuracy are comparable')
+
 
 # evaluate the model metrics
 y_pred = classifier.predict(X_val)
+
 from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_val, y_pred, labels=classifier.classes_)
 print(cm)
@@ -153,71 +206,119 @@ plt.savefig(f'feature_importance.png')  # Save the plot
 plt.show()
 
 #wow, I've got to O_NN already!
-y_sm = classifier.predict(X_neg)
-plt.hist(classifier.predict_proba(X_pos)[:,1]-classifier.predict_proba(X_pos)[:,0],histtype='step',bins=28,range=(-1,1))
-plt.hist(classifier.predict_proba(X_neg)[:,1]-classifier.predict_proba(X_neg)[:,0],histtype='step',bins=28,range=(-1,1))
-plt.hist(classifier.predict_proba(X_even)[:,1]-classifier.predict_proba(X_even)[:,0],histtype='step',bins=28,range=(-1,1))
-plt.hist(classifier.predict_proba(X_odd)[:,1]-classifier.predict_proba(X_odd)[:,0],histtype='step',bins=28,range=(-1,1))
-plt.hist(classifier.predict_proba(X_pos_20)[:,1]-classifier.predict_proba(X_pos_20)[:,0],histtype='step',bins=28,range=(-1,1))
-plt.hist(classifier.predict_proba(X_neg_20)[:,1]-classifier.predict_proba(X_neg_20)[:,0],histtype='step',bins=28,range=(-1,1))
+#y_sm = classifier.predict(X_neg)
+legend_labels = []
+# dynamically plot histograms for all phi values
+for phi, X_phi_scaled in X_scaled.items():
+    if phi =='0':
+        label = f'CP-even ($\\phi$ = 0°)'
+    elif phi =='90':
+        label = f'CP-odd ($\\phi$ = 90°)'
+    else:
+        label = f'CP-mix ($\\phi$ = {phi}°)'
+
+    legend_labels.append(label)
+
+    plt.hist(classifier.predict_proba(X_phi_scaled)[:,0]-classifier.predict_proba(X_phi_scaled)[:,1],histtype='step',bins=28,range=(-1,1))
+
 plt.xlabel('$O_{NN}$')
 plt.ylabel('Weights (arbitrary units)')
-plt.legend([f'CP-mix ($\\phi$ = 45°)', 'CP-mix ($\\phi$ = -45°)', 'CP-even ($\\phi$ = 0°)', 'CP-odd ($\\phi$ = 90°)', 'CP-mix ($\\phi$ = 20°)', 'CP-mix ($\\phi$ = -20°)'])
+plt.legend(legend_labels)
 plt.savefig(f'ONN_distribution.png')  # Save the plot
 plt.show()
 
-plt.hist(classifier.predict_proba(X_even)[:,2],histtype='step',bins=28,range=(-1,1))
-plt.hist(classifier.predict_proba(X_odd)[:,2],histtype='step',bins=28,range=(-1,1))
+"""
+for phi, X_phi_scaled in X_scaled.items():
+    plt.hist(classifier.predict_proba(X_phi_scaled)[:,0]-classifier.predict_proba(X_phi_scaled)[:,1],histtype='step',bins=28,range=(-1,-0.99999))
+
 plt.xlabel('$O_{NN}$')
 plt.ylabel('Weights (arbitrary units)')
-plt.legend(['CP-even ($\\phi$ = 0°)', 'CP-odd ($\\phi$ = 90°)'])
-plt.savefig(f'ONN_even_odd_distribution.png')  # Save the plot
+plt.legend(legend_labels)
+plt.savefig(f'ONN_distribution1.png')  # Save the plot
 plt.show()
 
+for phi, X_phi_scaled in X_scaled.items():
+    plt.hist(classifier.predict_proba(X_phi_scaled)[:,0]-classifier.predict_proba(X_phi_scaled)[:,1],histtype='step',bins=28,range=(0.99999,1))
+
+plt.xlabel('$O_{NN}$')
+plt.ylabel('Weights (arbitrary units)')
+plt.legend(legend_labels)
+plt.savefig(f'ONN_distribution2.png')  # Save the plot
+plt.show()
+"""
+
+# exclude weight column from df.columns
+filtered_columns = [col for col in df.columns if col != 'Weight']
+
+# plot distributions of all input variables before and after scaling
+for variable in filtered_columns:
+
+    combined_unscaled_data = []
+
+    combined_scaled_data = []
+
+
+    for phi, X_phi in X.items():
+        # extract unscaled data from column corresponding to variable and append to combined_unscaled_data
+        combined_unscaled_data.append(X_phi[:, filtered_columns.index(variable)])
+
+    for phi, X_phi_scaled in X_scaled.items():
+        # extract scaled data from column corresponding to variable and append to combined_scaled_data
+        combined_scaled_data.append(X_phi_scaled[:, filtered_columns.index(variable)])
+        
+
+    # plot unscaled distribution of this variable
+    plt.hist(combined_unscaled_data, bins=28, histtype='step')
+    plt.xlabel(variable)
+    plt.ylabel('Weights (arbitrary units)')
+    plt.legend(legend_labels)
+    plt.title(f'Unscaled Distribution of {variable}')
+    plt.savefig(f'Unscaled_{variable}_distribution.png')
+    plt.show()
+
+    # plot the distribution of this scaled variable for all phi values
+    plt.hist(combined_scaled_data, bins=28, histtype='step')
+    plt.xlabel(f'Scaled {variable}')
+    plt.ylabel('Weights (arbitrary units)')
+    plt.legend(legend_labels)
+    plt.title(f'Scaled Distribution of {variable}')
+    plt.savefig(f'Scaled_{variable}_distribution.png')
+    plt.show()
+
+
 #plot the variable distribution as a simplest cross check
-plt.hist(df_pos['SignedAcoplanarity'],histtype='step',bins=28,range=(0,np.pi*2))
-plt.hist(df_neg['SignedAcoplanarity'],histtype='step',bins=28, range=(0,np.pi*2))
-plt.hist(df_even['SignedAcoplanarity'],histtype='step',bins=28, range=(0,np.pi*2))
-plt.hist(df_odd['SignedAcoplanarity'],histtype='step',bins=28, range=(0,np.pi*2))
-plt.hist(df_pos_20['SignedAcoplanarity'],histtype='step',bins=28, range=(0,np.pi*2))
-plt.hist(df_neg_20['SignedAcoplanarity'],histtype='step',bins=28, range=(0,np.pi*2))
+for phi, df in dataframes.items():
+    plt.hist(df['SignedAcoplanarity'],histtype='step',bins=28,range=(0,np.pi*2))
+
 #add axis labels to this plot
 plt.xlabel('$\\varphi^*_{CP}$')
 plt.ylabel('Weights (arbitrary units)')
 #add legend to this plot
-plt.legend(['CP-mix ($\\phi$ = 45°)','CP-mix ($\\phi$ = -45°)', 'CP-even ($\\phi$ = 0°)', 'CP-odd ($\\phi$ = 90°)', 'CP-mix ($\\phi$ = 20°)', 'CP-mix ($\\phi$ = -20°)']) 
+plt.legend(legend_labels)
 plt.savefig(f'SignedAcoplanarity_Distribution.png')  # Save the plot
 plt.show()
 
 
+
+histograms = {}
 # Create a ROOT file to save the histograms
 output_file = TFile(f'H_tautau_ONN.root', 'RECREATE')
 
+for phi, X_phi_scaled in X_scaled.items():
+    hist_name = f'hist_ONN_phi_{phi}'
+    hist_title = f'ONN ($\\phi$ = {phi}°)'
 
-hist_ONN_pos_interference = TH1D('hist_ONN_pos', 'ONN Positive', 28, -1, 1)
-hist_ONN_neg_interference = TH1D('hist_ONN_neg', 'ONN Negative', 28, -1, 1)
-hist_ONN_even = TH1D('hist_ONN_even', 'ONN Even', 28, -1, 1)
-hist_ONN_odd = TH1D('hist_ONN_odd', 'ONN Odd', 28, -1, 1)
+    histograms[phi] = TH1D(hist_name, hist_title, 28, -1, 1)
+
+
 
 # Fill the histograms with the data from the DataFrame
-for value in zip(classifier.predict_proba(X_pos)[:,1]-classifier.predict_proba(X_pos)[:,0]):
-    hist_ONN_pos_interference.Fill(value)
+for phi, X_phi_scaled in X_scaled.items():
+    for value in classifier.predict_proba(X_phi_scaled)[:,0]-classifier.predict_proba(X_phi_scaled)[:,1]:
+        histograms[phi].Fill(value)
 
-for value in zip(classifier.predict_proba(X_neg)[:,1]-classifier.predict_proba(X_neg)[:,0]):
-    hist_ONN_neg_interference.Fill(value)
-
-for value in zip(classifier.predict_proba(X_even)[:,1]-classifier.predict_proba(X_even)[:,0]):
-    hist_ONN_even.Fill(value)
-
-for value in zip(classifier.predict_proba(X_odd)[:,1]-classifier.predict_proba(X_odd)[:,0]):
-    hist_ONN_odd.Fill(value)
-
-
-# Write the histograms to the ROOT file
-hist_ONN_pos_interference.Write()
-hist_ONN_neg_interference.Write()
-hist_ONN_even.Write()
-hist_ONN_odd.Write()
+    # write the histogram to the ROOT file
+    histograms[phi].Write()
 
 # Close the ROOT file
 output_file.Close()
